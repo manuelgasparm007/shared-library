@@ -14,7 +14,7 @@ export function renderMembers(container) {
       m.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       m.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (m.phone && m.phone.toLowerCase().includes(searchQuery.toLowerCase()));
-  });
+  }).sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: 'base' }));
 
   const membersHtml = `
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
@@ -28,7 +28,9 @@ export function renderMembers(container) {
 
     <!-- Search Bar -->
     <div style="background:var(--bg-card); padding:1rem 1.25rem; border-radius:var(--radius-lg); border:1px solid var(--border-glass);">
-      <input type="text" id="member-search-input" placeholder="🔍 Pesquisar leitor por nome, email ou telefone..." value="${searchQuery}">
+      <div class="form-group" style="margin:0;">
+        <input type="text" id="member-search-input" placeholder="🔍 Pesquisar leitor por nome, email ou telefone..." value="${searchQuery}">
+      </div>
     </div>
 
     <!-- Members Table -->
@@ -49,6 +51,7 @@ export function renderMembers(container) {
           ${filteredMembers.length === 0 ? '<tr><td colspan="7" style="text-align:center; color:var(--text-dim);">Nenhum leitor encontrado</td></tr>' : ''}
           ${filteredMembers.map(member => {
             const memberActiveLoans = loans.filter(l => l.memberName === member.fullName && l.status === 'Emprestado');
+            const isPending = member.status === 'pending';
             return `
               <tr>
                 <td><strong>${member.id}</strong></td>
@@ -60,6 +63,7 @@ export function renderMembers(container) {
                     <div>
                       <strong>${member.fullName}</strong>
                       ${member.role === 'librarian' ? `<span style="font-size:0.7rem; margin-left:0.4rem; background:rgba(99, 102, 241, 0.2); color:#818cf8; padding:0.15rem 0.4rem; border-radius:var(--radius-sm);">Bibliotecário</span>` : ''}
+                      ${isPending ? `<span style="font-size:0.7rem; margin-left:0.4rem; background:rgba(239, 68, 68, 0.2); color:#ef4444; padding:0.15rem 0.4rem; border-radius:var(--radius-sm);">Aguarda Aprovação</span>` : ''}
                     </div>
                   </div>
                 </td>
@@ -67,12 +71,15 @@ export function renderMembers(container) {
                 <td>${member.phone || 'N/A'}</td>
                 <td>${member.joinedDate}</td>
                 <td>
-                  <span class="status-tag ${memberActiveLoans.length > 0 ? 'borrowed' : 'available'}">
-                    ${memberActiveLoans.length} empréstimo(s) activo(s)
+                  <span class="status-tag ${isPending ? 'overdue' : (memberActiveLoans.length > 0 ? 'borrowed' : 'available')}">
+                    ${isPending ? '⏳ Conta Pendente' : `${memberActiveLoans.length} empréstimo(s)`}
                   </span>
                 </td>
                 ${isLibrarian ? `
                   <td style="text-align:right;">
+                    ${isPending ? `
+                      <button class="btn btn-secondary btn-sm btn-approve-member" data-id="${member.id}" style="background:rgba(16, 185, 129, 0.2); color:#10b981; border-color:rgba(16, 185, 129, 0.4);" title="Aprovar Conta de Leitor">✅ Aprovar</button>
+                    ` : ''}
                     <button class="btn btn-secondary btn-sm btn-edit-member" data-id="${member.id}">✏️</button>
                     <button class="btn btn-danger btn-sm btn-delete-member" data-id="${member.id}">🗑️</button>
                   </td>
@@ -100,6 +107,15 @@ export function renderMembers(container) {
     if (addBtn) {
       addBtn.addEventListener('click', () => openMemberModal(null, () => renderMembers(container)));
     }
+
+    container.querySelectorAll('.btn-approve-member').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.dataset.id;
+        store.approveMember(id);
+        showToast('Conta de leitor aprovada com sucesso!', 'success');
+        renderMembers(container);
+      });
+    });
 
     container.querySelectorAll('.btn-edit-member').forEach(btn => {
       btn.addEventListener('click', (e) => {

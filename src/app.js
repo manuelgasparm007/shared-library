@@ -1,5 +1,5 @@
 import { store } from './data/store.js';
-import { renderAuthModal } from './components/auth.js';
+import { renderLandingAuth } from './components/auth.js';
 import { renderDashboard } from './components/dashboard.js';
 import { renderCatalog } from './components/catalog.js';
 import { renderMembers } from './components/members.js';
@@ -7,15 +7,13 @@ import { renderLoans } from './components/loans.js';
 import { renderSettings } from './components/settings.js';
 import { showToast } from './components/toast.js';
 
-let currentView = 'dashboard';
+let currentView = 'catalog';
 
 document.addEventListener('DOMContentLoaded', () => {
   initApp();
 });
 
 function initApp() {
-  const currentUser = store.getCurrentUser();
-  
   // Mobile Sidebar Drawer Setup
   setupMobileDrawer();
 
@@ -67,22 +65,42 @@ function initApp() {
   document.getElementById('btn-logout').addEventListener('click', (e) => {
     e.stopPropagation();
     store.logout();
-    openAuthDialog();
+    checkAuthState();
   });
 
   document.getElementById('user-profile-btn').addEventListener('click', () => {
-    openAuthDialog();
+    store.logout();
+    checkAuthState();
   });
 
   // Listen to store updates
   store.addEventListener('store-change', () => {
-    const user = store.getCurrentUser();
-    updateUserUI(user);
-    renderCurrentView();
+    checkAuthState();
   });
 
-  updateUserUI(currentUser);
-  renderCurrentView();
+  // Check initial authentication state
+  checkAuthState();
+}
+
+function checkAuthState() {
+  const currentUser = store.getCurrentUser();
+  const appShell = document.getElementById('app');
+  const authPortal = document.getElementById('auth-portal');
+
+  if (!currentUser) {
+    if (appShell) appShell.style.display = 'none';
+    renderLandingAuth(authPortal, (user) => {
+      authPortal.innerHTML = '';
+      if (appShell) appShell.style.display = 'flex';
+      updateUserUI(user);
+      renderCurrentView();
+    });
+  } else {
+    authPortal.innerHTML = '';
+    if (appShell) appShell.style.display = 'flex';
+    updateUserUI(currentUser);
+    renderCurrentView();
+  }
 }
 
 function setupMobileDrawer() {
@@ -203,13 +221,4 @@ function renderCurrentView() {
     default:
       renderCatalog(viewport);
   }
-}
-
-function openAuthDialog() {
-  const portal = document.getElementById('auth-portal');
-  renderAuthModal(portal, (user) => {
-    portal.innerHTML = '';
-    updateUserUI(user);
-    renderCurrentView();
-  });
 }

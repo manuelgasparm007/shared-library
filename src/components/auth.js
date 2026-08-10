@@ -1,71 +1,151 @@
 import { store } from '../data/store.js';
 import { showToast } from './toast.js';
 
-export function renderAuthModal(container, onSuccess) {
-  const modalHtml = `
-    <div class="modal-backdrop-overlay" id="backdrop-auth-modal"></div>
-    <dialog id="auth-modal" class="custom-modal" open>
-      <div class="modal-header">
-        <h3 id="auth-modal-title">🌿 Sessão - Biblioteca Camomila</h3>
+export function renderLandingAuth(container, onSuccess) {
+  const landingHtml = `
+    <div class="landing-page-overlay">
+      <div class="landing-card">
+        <div class="landing-header">
+          <div class="landing-logo-icon">
+            <img src="/favicon.png" alt="Biblioteca Camomila Logo" style="width: 34px; height: 34px; object-fit: contain;">
+          </div>
+          <h2>Biblioteca Camomila</h2>
+          <p>Sistema de Gestão da Biblioteca</p>
+        </div>
+
+        <!-- Mode Switcher Tabs -->
+        <div class="auth-tabs" style="display:flex; background:var(--bg-glass); border:1px solid var(--border-glass); border-radius:var(--radius-md); padding:4px; gap:4px;">
+          <button type="button" id="tab-login" class="auth-tab-btn active" style="flex:1; padding:0.55rem; border:none; border-radius:var(--radius-sm); font-weight:600; cursor:pointer; background:var(--accent-primary); color:#fff; transition:all 0.2s;">🔑 Iniciar Sessão</button>
+          <button type="button" id="tab-register" class="auth-tab-btn" style="flex:1; padding:0.55rem; border:none; border-radius:var(--radius-sm); font-weight:600; cursor:pointer; background:transparent; color:var(--text-muted); transition:all 0.2s;">✨ Criar Conta</button>
+        </div>
+
+        <!-- Login Form -->
+        <form id="form-login" class="landing-form">
+          <div class="form-group">
+            <label>Endereço de Email *</label>
+            <input type="email" id="login-email" placeholder="seu.email@exemplo.pt" required value="admin@camomila.pt">
+          </div>
+
+          <div class="form-group">
+            <label>Palavra-passe (Demo) *</label>
+            <input type="password" id="login-password" value="123456" placeholder="••••••••" required>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-landing">Entrar na Biblioteca</button>
+        </form>
+
+        <!-- Registration Form -->
+        <form id="form-register" class="landing-form" style="display:none;">
+          <div class="form-group">
+            <label>Nome Completo *</label>
+            <input type="text" id="reg-name" placeholder="Ex: Maria Santos" required>
+          </div>
+
+          <div class="form-group">
+            <label>Endereço de Email *</label>
+            <input type="email" id="reg-email" placeholder="maria.santos@exemplo.pt" required>
+          </div>
+
+          <div class="form-group">
+            <label>Número de Telefone</label>
+            <input type="tel" id="reg-phone" placeholder="+351 912 345 678">
+          </div>
+
+          <div class="form-group">
+            <label>Palavra-passe *</label>
+            <input type="password" id="reg-password" value="123456" placeholder="••••••••" required>
+          </div>
+
+          <div style="font-size:0.78rem; color:var(--text-muted); background:var(--bg-glass); padding:0.65rem; border-radius:var(--radius-sm); border:1px solid var(--border-glass);">
+            ℹ️ As novas contas são criadas com permissões de <strong>Leitor</strong> e requerem aprovação prévia pelo Bibliotecário.
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-landing">Registar Conta de Leitor</button>
+        </form>
+
+        <!-- Demo Credentials Hints -->
+        <div class="landing-demo-hints" id="demo-hints-box">
+          <div style="font-weight:700; font-size:0.8rem; color:var(--text-muted); margin-bottom:0.4rem;">💡 Contas de Demonstração (Clique para preencher):</div>
+          <div class="demo-chip" id="demo-admin">
+            <span>👑 Admin / Bibliotecário:</span> <code>admin@camomila.pt</code>
+          </div>
+          <div class="demo-chip" id="demo-patron">
+            <span>👤 Leitor / Membro:</span> <code>manuelgasparm@gmail.com</code>
+          </div>
+        </div>
       </div>
-      <form id="auth-form" class="modal-body">
-        <div class="form-group">
-          <label>Perfil de Acesso</label>
-          <select id="auth-role" class="form-control">
-            <option value="librarian">Bibliotecário / Administrador</option>
-            <option value="patron" selected>Leitor / Membro</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Endereço de Email</label>
-          <input type="email" id="auth-email" placeholder="exemplo@bibliotecacamomila.pt" required value="manuelgasparm@gmail.com">
-        </div>
-
-        <div class="form-group" id="name-group" style="display: none;">
-          <label>Nome Completo</label>
-          <input type="text" id="auth-name" placeholder="O seu nome completo">
-        </div>
-
-        <div class="form-group">
-          <label>Palavra-passe (Demo)</label>
-          <input type="password" id="auth-password" value="123456" placeholder="••••••••">
-        </div>
-      </form>
-      <div class="modal-footer">
-        <button type="button" id="btn-auth-submit" class="btn btn-primary" style="width:100%;">Entrar na Aplicação</button>
-      </div>
-    </dialog>
+    </div>
   `;
 
-  container.innerHTML = modalHtml;
+  container.innerHTML = landingHtml;
 
-  const roleSelect = document.getElementById('auth-role');
-  const emailInput = document.getElementById('auth-email');
-  const nameGroup = document.getElementById('name-group');
+  const tabLogin = document.getElementById('tab-login');
+  const tabRegister = document.getElementById('tab-register');
+  const formLogin = document.getElementById('form-login');
+  const formRegister = document.getElementById('form-register');
+  const demoBox = document.getElementById('demo-hints-box');
+  const loginEmail = document.getElementById('login-email');
 
-  roleSelect.addEventListener('change', (e) => {
-    if (e.target.value === 'librarian') {
-      emailInput.value = 'admin@biblioteca.pt';
-      nameGroup.style.display = 'none';
-    } else {
-      emailInput.value = 'manuelgasparm@gmail.com';
-      nameGroup.style.display = 'none';
+  // Tab Switcher
+  tabLogin.addEventListener('click', () => {
+    tabLogin.style.background = 'var(--accent-primary)';
+    tabLogin.style.color = '#fff';
+    tabRegister.style.background = 'transparent';
+    tabRegister.style.color = 'var(--text-muted)';
+    formLogin.style.display = 'flex';
+    formRegister.style.display = 'none';
+    demoBox.style.display = 'flex';
+  });
+
+  tabRegister.addEventListener('click', () => {
+    tabRegister.style.background = 'var(--accent-primary)';
+    tabRegister.style.color = '#fff';
+    tabLogin.style.background = 'transparent';
+    tabLogin.style.color = 'var(--text-muted)';
+    formRegister.style.display = 'flex';
+    formLogin.style.display = 'none';
+    demoBox.style.display = 'none';
+  });
+
+  // Demo Credentials
+  document.getElementById('demo-admin').addEventListener('click', () => {
+    loginEmail.value = 'admin@camomila.pt';
+  });
+
+  document.getElementById('demo-patron').addEventListener('click', () => {
+    loginEmail.value = 'manuelgasparm@gmail.com';
+  });
+
+  // Login Form Submission
+  formLogin.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const email = loginEmail.value.trim();
+
+    try {
+      const user = store.login(email);
+      showToast(`Bem-vindo, ${user.name}!`, 'success');
+      if (onSuccess) onSuccess(user);
+    } catch (err) {
+      showToast(err.message, 'error');
     }
   });
 
-  document.getElementById('btn-auth-submit').addEventListener('click', () => {
-    const role = roleSelect.value;
-    const email = emailInput.value.trim();
-    const name = document.getElementById('auth-name').value.trim();
+  // Registration Form Submission
+  formRegister.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const fullName = document.getElementById('reg-name').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const phone = document.getElementById('reg-phone').value.trim();
 
-    if (!email) {
-      showToast('Por favor insira o seu email', 'error');
-      return;
+    try {
+      store.registerNewUser({ fullName, email, phone });
+      showToast('Conta registada com sucesso! O seu pedido de leitor aguarda aprovação pelo Bibliotecário.', 'success');
+
+      // Switch to login tab and prefill email
+      loginEmail.value = email;
+      tabLogin.click();
+    } catch (err) {
+      showToast(err.message, 'error');
     }
-
-    const user = store.login(email, role, name);
-    showToast(`Bem-vindo, ${user.name}!`, 'success');
-    if (onSuccess) onSuccess(user);
   });
 }

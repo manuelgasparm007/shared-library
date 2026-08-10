@@ -105,13 +105,39 @@ shared-library/
 4. Abra o navegador em `http://localhost:5173`.
 
 ### Compilar para Produção:
-Para gerar os ficheiros optimizados prontos a alojar no Vercel, Netlify ou GitHub Pages:
+Para gerar os ficheiros optimizados de produção na pasta `dist/`:
 ```bash
 npm run build
 ```
-Os ficheiros serão gerados na pasta `dist/`.
+
+Para testar a versão de produção localmente antes de alojar:
+```bash
+npm run preview
+```
 
 ---
+
+## 🚀 Guia de Alojamento e Publicação (Deploy Gratuito)
+
+Como a aplicação é compilada em ficheiros estáticos (HTML, CSS e JavaScript), pode ser alojada **100% gratuitamente ($0/ano)** em qualquer serviço de alojamento estático:
+
+### Opção 1: Vercel (Recomendado - 1 Clique)
+1. Instale o CLI do Vercel ou crie conta em [vercel.com](https://vercel.com).
+2. Execute no terminal dentro da pasta do projecto:
+   ```bash
+   npx vercel
+   ```
+3. Siga as instruções no ecrã (Build Command: `npm run build`, Output Directory: `dist`).
+
+### Opção 2: Netlify (Arrastar e Largar)
+1. Crie conta gratuita em [netlify.com](https://netlify.com).
+2. Execute `npm run build` na sua máquina.
+3. No painel do Netlify, aceda a **Sites** -> Arraste e largue a pasta `dist` gerada.
+
+### Opção 3: GitHub Pages
+1. Guarde o código num repositório no GitHub.
+2. Nas definições do repositório em **Settings -> Pages**:
+   - Seleccione a source: **GitHub Actions** ou a branch `gh-pages` a apontar para a pasta `dist`.
 
 ## 🌩️ Configuração de Base de Dados Cloud (Supabase)
 

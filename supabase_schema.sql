@@ -1,20 +1,7 @@
--- SQL Schema for Gestão de Biblioteca (Supabase PostgreSQL Setup)
+-- SQL Schema for Biblioteca Camomila (Supabase PostgreSQL Setup)
 -- Copy and paste this script into the Supabase SQL Editor to initialize your cloud database.
 
--- 1. Genres Table
-CREATE TABLE IF NOT EXISTS public.genres (
-    id SERIAL PRIMARY KEY,
-    name TEXT NOT NULL UNIQUE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
--- 2. Book Statuses Table
-CREATE TABLE IF NOT EXISTS public.book_statuses (
-    id SERIAL PRIMARY KEY,
-    status TEXT NOT NULL UNIQUE
-);
-
--- 3. Books Table
+-- 1. Books Table
 CREATE TABLE IF NOT EXISTS public.books (
     id TEXT PRIMARY KEY, -- e.g. B001
     title TEXT NOT NULL,
@@ -30,7 +17,7 @@ CREATE TABLE IF NOT EXISTS public.books (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 4. Members / Patrons Table
+-- 2. Members / Patrons Table
 CREATE TABLE IF NOT EXISTS public.members (
     id TEXT PRIMARY KEY, -- e.g. M001
     full_name TEXT NOT NULL,
@@ -41,7 +28,7 @@ CREATE TABLE IF NOT EXISTS public.members (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 5. Loans / Transactions Table
+-- 3. Loans / Transactions Table
 CREATE TABLE IF NOT EXISTS public.loans (
     id TEXT PRIMARY KEY, -- e.g. T001
     book_id TEXT REFERENCES public.books(id) ON DELETE CASCADE,
@@ -55,7 +42,7 @@ CREATE TABLE IF NOT EXISTS public.loans (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Enable Row Level Security (RLS) & Public Access Policies for Demo Simplicity
+-- Enable Row Level Security (RLS) & Public Access Policies
 ALTER TABLE public.books ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.loans ENABLE ROW LEVEL SECURITY;

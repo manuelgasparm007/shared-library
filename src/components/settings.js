@@ -5,6 +5,7 @@ export function renderSettings(container) {
   const currentUser = store.getCurrentUser();
   const isLibrarian = currentUser.role === 'librarian';
   const cloudConfig = store.getCloudConfig();
+  const isCloudActive = !!(cloudConfig.url && cloudConfig.key);
 
   const settingsHtml = `
     <div>
@@ -37,8 +38,14 @@ export function renderSettings(container) {
 
       <!-- Supabase Cloud Sync Card -->
       <div style="background:var(--bg-card); border:1px solid var(--border-glass); border-radius:var(--radius-lg); padding:1.5rem; display:flex; flex-direction:column; gap:1.25rem;">
-        <h3>🌩️ Sincronização Cloud (Supabase)</h3>
-        <p style="color:var(--text-muted); font-size:0.88rem;">Conecte uma base de dados Supabase para permitir que múltiplos bibliotecários e leitores vejam alterações em tempo real em todos os dispositivos.</p>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h3>🌩️ Sincronização Cloud (Supabase)</h3>
+          <span class="status-tag ${isCloudActive ? 'available' : 'borrowed'}">
+            ${isCloudActive ? '🟢 Ativa' : '⚪ Não Configurada'}
+          </span>
+        </div>
+
+        <p style="color:var(--text-muted); font-size:0.88rem;">Conecte uma base de dados Supabase para sincronização em tempo real entre computadores e telemóveis.</p>
 
         <form id="cloud-config-form" style="display:flex; flex-direction:column; gap:1rem;">
           <div class="form-group">
@@ -54,8 +61,15 @@ export function renderSettings(container) {
           ${isLibrarian ? `<button type="submit" class="btn btn-primary">Guardar Credenciais Cloud</button>` : ''}
         </form>
 
+        ${isLibrarian && isCloudActive ? `
+          <div style="display:flex; flex-direction:column; gap:0.5rem; padding-top:0.75rem; border-top:1px solid var(--border-glass);">
+            <button id="btn-cloud-push" class="btn btn-secondary btn-sm">⬆️ Enviar Todos os Dados para o Supabase (Push All)</button>
+            <button id="btn-cloud-pull" class="btn btn-secondary btn-sm">⬇️ Carregar Dados do Supabase (Pull Remote)</button>
+          </div>
+        ` : ''}
+
         <div style="font-size:0.8rem; color:var(--text-dim); background:var(--bg-glass); padding:0.75rem; border-radius:var(--radius-md);">
-          ℹ️ <strong>Ficheiro SQL Incluído:</strong> Execute o ficheiro <code style="color:var(--accent-primary);">supabase_schema.sql</code> no Editor SQL do Supabase para criar as tabelas automaticamente em 1 clique.
+          ℹ️ <strong>Ficheiro SQL Incluído:</strong> Execute o ficheiro <code style="color:var(--accent-primary);">supabase_schema.sql</code> no Editor SQL do Supabase para criar as tabelas automaticamente.
         </div>
       </div>
     </div>
@@ -101,12 +115,47 @@ export function renderSettings(container) {
       }
     });
 
-    document.getElementById('cloud-config-form').addEventListener('submit', (e) => {
+    document.getElementById('cloud-config-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const url = document.getElementById('cloud-url').value.trim();
       const key = document.getElementById('cloud-key').value.trim();
       store.setCloudConfig(url, key);
-      showToast('Credenciais de Sincronização Cloud guardadas com sucesso!', 'success');
+      showToast('Credenciais guardadas! A testar ligação ao Supabase...', 'info');
+
+      try {
+        await store.syncAllToCloud();
+        showToast('Ligação ao Supabase estabelecida! Todos os dados foram sincronizados com sucesso.', 'success');
+        renderSettings(container);
+      } catch (err) {
+        showToast('Ligação guardada. Execute supabase_schema.sql no Supabase se ainda não criou as tabelas.', 'info');
+      }
     });
+
+    const btnPush = document.getElementById('btn-cloud-push');
+    const btnPull = document.getElementById('btn-cloud-pull');
+
+    if (btnPush) {
+      btnPush.addEventListener('click', async () => {
+        showToast('A enviar dados para o Supabase...', 'info');
+        try {
+          await store.syncAllToCloud();
+          showToast('Todos os livros, leitores e empréstimos foram enviados para o Supabase!', 'success');
+        } catch (err) {
+          showToast(err.message, 'error');
+        }
+      });
+    }
+
+    if (btnPull) {
+      btnPull.addEventListener('click', async () => {
+        showToast('A carregar dados do Supabase...', 'info');
+        try {
+          await store.fetchFromCloud();
+          showToast('Dados remotos do Supabase carregados com sucesso!', 'success');
+        } catch (err) {
+          showToast(err.message, 'error');
+        }
+      });
+    }
   }
 }
