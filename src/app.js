@@ -37,29 +37,9 @@ function initApp() {
     }
   });
 
-  // Theme Selector Setup (5 Curated Themes)
-  const themeSelector = document.getElementById('theme-selector');
-  let currentTheme = localStorage.getItem('library_theme') || 'dark';
+  // Initialize active theme
+  const currentTheme = localStorage.getItem('library_theme') || 'parchment';
   document.documentElement.setAttribute('data-theme', currentTheme);
-
-  if (themeSelector) {
-    themeSelector.value = currentTheme;
-    themeSelector.addEventListener('change', (e) => {
-      currentTheme = e.target.value;
-      document.documentElement.setAttribute('data-theme', currentTheme);
-      localStorage.setItem('library_theme', currentTheme);
-
-      const themeNames = {
-        dark: '🌙 Escuro (Midnight)',
-        light: '☀️ Claro (Nórdico)',
-        camomila: '🌿 Camomila (Verde)',
-        parchment: '📜 Pergaminho (Sépia)',
-        violet: '💜 Violeta (Cyber)'
-      };
-
-      showToast(`Tema ${themeNames[currentTheme] || currentTheme} activado`, 'info');
-    });
-  }
 
   // Logout Click Listener
   document.getElementById('btn-logout').addEventListener('click', (e) => {
@@ -161,8 +141,8 @@ function updateUserUI(user) {
   navItems.forEach(item => {
     const view = item.dataset.view;
     if (!isLibrarian) {
-      // Patron view: only show catalog & loans (My Loans)
-      if (view === 'catalog' || view === 'loans') {
+      // Patron view: show catalog, loans (Os Meus Empréstimos), AND settings (Definições)
+      if (view === 'catalog' || view === 'loans' || view === 'settings') {
         item.style.display = 'flex';
         if (view === 'loans') {
           item.innerHTML = '<span>🔄</span> Os Meus Empréstimos';
@@ -180,7 +160,7 @@ function updateUserUI(user) {
   });
 
   // If Patron attempts to view admin-only pages, redirect to catalog
-  if (!isLibrarian && (currentView === 'dashboard' || currentView === 'members' || currentView === 'settings')) {
+  if (!isLibrarian && (currentView === 'dashboard' || currentView === 'members')) {
     switchView('catalog');
   }
 }

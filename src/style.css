@@ -709,6 +709,38 @@ dialog.custom-modal::backdrop {
   box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
+/* Explicit Select Option Contrast Across All Themes */
+select option {
+  background-color: var(--bg-secondary);
+  color: var(--text-main);
+  padding: 0.5rem;
+}
+
+[data-theme="light"] select option {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+}
+
+[data-theme="parchment"] select option {
+  background-color: #fffdf9 !important;
+  color: #292319 !important;
+}
+
+[data-theme="dark"] select option {
+  background-color: #111827 !important;
+  color: #f9fafb !important;
+}
+
+[data-theme="camomila"] select option {
+  background-color: #12241b !important;
+  color: #ecfdf5 !important;
+}
+
+[data-theme="violet"] select option {
+  background-color: #170e28 !important;
+  color: #faf5ff !important;
+}
+
 /* Toast Notifications */
 #toast-container {
   position: fixed;

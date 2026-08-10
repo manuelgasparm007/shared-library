@@ -393,8 +393,6 @@ class LibraryStore extends EventTarget {
       books: this.getBooks(),
       members: this.getMembers(),
       loans: this.getLoans(),
-      genres: this.getGenres(),
-      statuses: this.getStatuses(),
       exportDate: new Date().toISOString()
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -412,8 +410,6 @@ class LibraryStore extends EventTarget {
       if (data.books) localStorage.setItem(STORAGE_KEYS.BOOKS, JSON.stringify(data.books));
       if (data.members) localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(data.members));
       if (data.loans) localStorage.setItem(STORAGE_KEYS.LOANS, JSON.stringify(data.loans));
-      if (data.genres) localStorage.setItem(STORAGE_KEYS.GENRES, JSON.stringify(data.genres));
-      if (data.statuses) localStorage.setItem(STORAGE_KEYS.STATUSES, JSON.stringify(data.statuses));
       this.notifyChange();
       return true;
     } catch (e) {
