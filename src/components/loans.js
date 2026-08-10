@@ -6,9 +6,17 @@ let filterStatus = 'ACTIVE'; // 'ACTIVE', 'RETURNED', 'OVERDUE', 'ALL'
 export function renderLoans(container) {
   const currentUser = store.getCurrentUser();
   const isLibrarian = currentUser.role === 'librarian';
-  const loans = store.getLoans();
+  const allLoans = store.getLoans();
 
-  const filteredLoans = loans.filter(loan => {
+  // Scope loans to user if patron
+  const userLoans = isLibrarian 
+    ? allLoans 
+    : allLoans.filter(l => 
+        (l.memberName && l.memberName.toLowerCase() === currentUser.name.toLowerCase()) || 
+        (l.memberEmail && l.memberEmail.toLowerCase() === currentUser.email.toLowerCase())
+      );
+
+  const filteredLoans = userLoans.filter(loan => {
     if (filterStatus === 'ACTIVE') return loan.status === 'Emprestado';
     if (filterStatus === 'RETURNED') return loan.status === 'Devolvido';
     if (filterStatus === 'OVERDUE') return loan.isOverdue && loan.status === 'Emprestado';
@@ -18,19 +26,19 @@ export function renderLoans(container) {
   const loansHtml = `
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
       <div>
-        <h2 style="font-size:1.8rem;">Gestão de Empréstimos & Devoluções</h2>
-        <p style="color:var(--text-muted); font-size:0.9rem;">Controlo de prazos, devoluções e renovações de livros</p>
+        <h2 style="font-size:1.8rem;">${isLibrarian ? 'Gestão de Empréstimos & Devoluções' : 'Os Meus Empréstimos'}</h2>
+        <p style="color:var(--text-muted); font-size:0.9rem;">${isLibrarian ? 'Controlo de prazos, devoluções e renovações de livros' : 'Histórico e estado das suas requisições de livros'}</p>
       </div>
 
       ${isLibrarian ? `<button id="btn-checkout-modal" class="btn btn-primary">📖 Registar Empréstimo</button>` : ''}
     </div>
 
     <!-- Filter Buttons -->
-    <div style="display:flex; gap:0.5rem; background:var(--bg-card); padding:0.5rem; border-radius:var(--radius-lg); border:1px solid var(--border-glass);">
-      <button class="btn btn-sm ${filterStatus === 'ACTIVE' ? 'btn-primary' : 'btn-secondary'}" data-filter="ACTIVE">Activos (${loans.filter(l => l.status === 'Emprestado').length})</button>
-      <button class="btn btn-sm ${filterStatus === 'OVERDUE' ? 'btn-primary' : 'btn-secondary'}" data-filter="OVERDUE">Em Atraso (${loans.filter(l => l.isOverdue).length})</button>
-      <button class="btn btn-sm ${filterStatus === 'RETURNED' ? 'btn-primary' : 'btn-secondary'}" data-filter="RETURNED">Devolvidos (${loans.filter(l => l.status === 'Devolvido').length})</button>
-      <button class="btn btn-sm ${filterStatus === 'ALL' ? 'btn-primary' : 'btn-secondary'}" data-filter="ALL">Todos os Registos (${loans.length})</button>
+    <div style="display:flex; gap:0.5rem; background:var(--bg-card); padding:0.5rem; border-radius:var(--radius-lg); border:1px solid var(--border-glass); flex-wrap:wrap;">
+      <button class="btn btn-sm ${filterStatus === 'ACTIVE' ? 'btn-primary' : 'btn-secondary'}" data-filter="ACTIVE">Activos (${userLoans.filter(l => l.status === 'Emprestado').length})</button>
+      <button class="btn btn-sm ${filterStatus === 'OVERDUE' ? 'btn-primary' : 'btn-secondary'}" data-filter="OVERDUE">Em Atraso (${userLoans.filter(l => l.isOverdue).length})</button>
+      <button class="btn btn-sm ${filterStatus === 'RETURNED' ? 'btn-primary' : 'btn-secondary'}" data-filter="RETURNED">Devolvidos (${userLoans.filter(l => l.status === 'Devolvido').length})</button>
+      <button class="btn btn-sm ${filterStatus === 'ALL' ? 'btn-primary' : 'btn-secondary'}" data-filter="ALL">Todos (${userLoans.length})</button>
     </div>
 
     <!-- Loans Table -->
@@ -139,7 +147,8 @@ function openCheckoutModal(onSave) {
   const todayStr = new Date().toISOString().split('T')[0];
 
   portal.innerHTML = `
-    <dialog id="modal-checkout-form" class="custom-modal" style="display:block;">
+    <div class="modal-backdrop-overlay" id="backdrop-checkout-modal"></div>
+    <dialog id="modal-checkout-form" class="custom-modal" open>
       <div class="modal-header">
         <h3>📖 Novo Empréstimo de Livro</h3>
         <button id="btn-close-checkout-modal" class="btn btn-secondary btn-sm" style="border:none;">✕</button>
@@ -185,6 +194,8 @@ function openCheckoutModal(onSave) {
 
   let selectedDays = 14;
 
+  const closeModal = () => portal.innerHTML = '';
+
   document.querySelectorAll('.preset-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       document.querySelectorAll('.preset-btn').forEach(b => {
@@ -198,8 +209,9 @@ function openCheckoutModal(onSave) {
     });
   });
 
-  document.getElementById('btn-close-checkout-modal').addEventListener('click', () => portal.innerHTML = '');
-  document.getElementById('btn-cancel-checkout').addEventListener('click', () => portal.innerHTML = '');
+  document.getElementById('btn-close-checkout-modal').addEventListener('click', closeModal);
+  document.getElementById('btn-cancel-checkout').addEventListener('click', closeModal);
+  document.getElementById('backdrop-checkout-modal').addEventListener('click', closeModal);
 
   document.getElementById('btn-save-checkout').addEventListener('click', () => {
     const bookId = document.getElementById('checkout-book-id').value;
@@ -218,7 +230,7 @@ function openCheckoutModal(onSave) {
       });
 
       showToast('Empréstimo registado com sucesso!', 'success');
-      portal.innerHTML = '';
+      closeModal();
       if (onSave) onSave();
     } catch (err) {
       showToast(err.message, 'error');

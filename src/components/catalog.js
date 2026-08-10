@@ -1,10 +1,11 @@
 import { store } from '../data/store.js';
 import { showToast } from './toast.js';
 
-let currentViewMode = 'grid'; // 'grid' or 'table'
+let currentViewMode = 'table'; // 'table' or 'grid'
 let searchQuery = '';
 let selectedGenre = 'ALL';
 let selectedStatus = 'ALL';
+let sortBy = 'title_asc'; // 'title_asc', 'title_desc', 'author_asc', 'year_desc', 'year_asc', 'status_avail', 'id_asc'
 
 export function renderCatalog(container) {
   const currentUser = store.getCurrentUser();
@@ -14,7 +15,7 @@ export function renderCatalog(container) {
   const statuses = store.getStatuses();
 
   // Filter books based on search & drop downs
-  const filteredBooks = books.filter(book => {
+  let filteredBooks = books.filter(book => {
     const matchesSearch = searchQuery === '' || 
       book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -27,10 +28,31 @@ export function renderCatalog(container) {
     return matchesSearch && matchesGenre && matchesStatus;
   });
 
+  // Sort books based on selected criterion
+  filteredBooks.sort((a, b) => {
+    switch (sortBy) {
+      case 'title_asc':
+        return a.title.localeCompare(b.title, 'pt');
+      case 'title_desc':
+        return b.title.localeCompare(a.title, 'pt');
+      case 'author_asc':
+        return a.author.localeCompare(b.author, 'pt');
+      case 'year_desc':
+        return (b.pubYear || 0) - (a.pubYear || 0);
+      case 'year_asc':
+        return (a.pubYear || 0) - (b.pubYear || 0);
+      case 'status_avail':
+        return (a.status === 'Disponível' ? 0 : 1) - (b.status === 'Disponível' ? 0 : 1);
+      case 'id_asc':
+      default:
+        return a.id.localeCompare(b.id, 'en', { numeric: true });
+    }
+  });
+
   const catalogHtml = `
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
       <div>
-        <h2 style="font-size:1.8rem;">Catálogo da Biblioteca</h2>
+        <h2 style="font-size:1.8rem;">Catálogo - Biblioteca Camomila</h2>
         <p style="color:var(--text-muted); font-size:0.9rem;">Explore e pesquise livros no acervo da biblioteca (${filteredBooks.length} de ${books.length})</p>
       </div>
 
@@ -45,8 +67,8 @@ export function renderCatalog(container) {
       </div>
     </div>
 
-    <!-- Filters Bar -->
-    <div style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap:1rem; background:var(--bg-card); padding:1rem 1.25rem; border-radius:var(--radius-lg); border:1px solid var(--border-glass);">
+    <!-- Filters & Sorting Bar -->
+    <div style="display:grid; grid-template-columns: 2fr 1fr 1fr 1.25fr; gap:1rem; background:var(--bg-card); padding:1rem 1.25rem; border-radius:var(--radius-lg); border:1px solid var(--border-glass);">
       <div class="form-group" style="margin:0;">
         <input type="text" id="catalog-search-input" placeholder="🔍 Pesquisar por título, autor, ISBN ou prateleira..." value="${searchQuery}">
       </div>
@@ -62,6 +84,18 @@ export function renderCatalog(container) {
         <select id="catalog-status-filter">
           <option value="ALL">Todos os Estados</option>
           ${statuses.map(s => `<option value="${s}" ${selectedStatus === s ? 'selected' : ''}>${s}</option>`).join('')}
+        </select>
+      </div>
+
+      <div class="form-group" style="margin:0;">
+        <select id="catalog-sort-filter">
+          <option value="title_asc" ${sortBy === 'title_asc' ? 'selected' : ''}>🔤 Ordenar: Título (A - Z)</option>
+          <option value="title_desc" ${sortBy === 'title_desc' ? 'selected' : ''}>🔤 Ordenar: Título (Z - A)</option>
+          <option value="author_asc" ${sortBy === 'author_asc' ? 'selected' : ''}>👤 Ordenar: Autor (A - Z)</option>
+          <option value="year_desc" ${sortBy === 'year_desc' ? 'selected' : ''}>📅 Ordenar: Ano (Mais Recente)</option>
+          <option value="year_asc" ${sortBy === 'year_asc' ? 'selected' : ''}>📅 Ordenar: Ano (Mais Antigo)</option>
+          <option value="status_avail" ${sortBy === 'status_avail' ? 'selected' : ''}>✅ Ordenar: Disponíveis Primeiro</option>
+          <option value="id_asc" ${sortBy === 'id_asc' ? 'selected' : ''}>🏷️ Ordenar: ID de Registo</option>
         </select>
       </div>
     </div>
@@ -108,6 +142,18 @@ export function renderCatalog(container) {
   document.getElementById('catalog-status-filter').addEventListener('change', (e) => {
     selectedStatus = e.target.value;
     renderCatalog(container);
+  });
+
+  document.getElementById('catalog-sort-filter').addEventListener('change', (e) => {
+    sortBy = e.target.value;
+    renderCatalog(container);
+  });
+
+  container.querySelectorAll('.sortable-header').forEach(header => {
+    header.addEventListener('click', (e) => {
+      sortBy = e.currentTarget.dataset.sortTarget;
+      renderCatalog(container);
+    });
   });
 
   if (isLibrarian) {
@@ -193,18 +239,25 @@ function renderGrid(books, isLibrarian) {
 }
 
 function renderTable(books, isLibrarian) {
+  const getSortIcon = (target) => {
+    if (sortBy === target) return ' ▲';
+    if (target === 'title_asc' && sortBy === 'title_desc') return ' ▼';
+    if (target === 'year_desc' && sortBy === 'year_asc') return ' ▲';
+    return '';
+  };
+
   return `
     <div class="table-container">
       <table class="custom-table">
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Título</th>
-            <th>Autor</th>
+            <th class="sortable-header" data-sort-target="id_asc" style="cursor:pointer;" title="Ordenar por ID">ID${getSortIcon('id_asc')}</th>
+            <th class="sortable-header" data-sort-target="${sortBy === 'title_asc' ? 'title_desc' : 'title_asc'}" style="cursor:pointer;" title="Ordenar por Título">Título${getSortIcon('title_asc') || getSortIcon('title_desc')}</th>
+            <th class="sortable-header" data-sort-target="author_asc" style="cursor:pointer;" title="Ordenar por Autor">Autor${getSortIcon('author_asc')}</th>
             <th>Género</th>
-            <th>Ano</th>
+            <th class="sortable-header" data-sort-target="${sortBy === 'year_desc' ? 'year_asc' : 'year_desc'}" style="cursor:pointer;" title="Ordenar por Ano">Ano${getSortIcon('year_desc') || getSortIcon('year_asc')}</th>
             <th>Prateleira</th>
-            <th>Estado</th>
+            <th class="sortable-header" data-sort-target="status_avail" style="cursor:pointer;" title="Ordenar por Disponibilidade">Estado${getSortIcon('status_avail')}</th>
             <th style="text-align:right;">Acções</th>
           </tr>
         </thead>
@@ -243,7 +296,8 @@ function openBookModal(book, onSave) {
   const statuses = store.getStatuses();
 
   portal.innerHTML = `
-    <dialog id="modal-book-form" class="custom-modal" style="display:block;">
+    <div class="modal-backdrop-overlay" id="backdrop-book-modal"></div>
+    <dialog id="modal-book-form" class="custom-modal" open>
       <div class="modal-header">
         <h3>${isEdit ? '✏️ Editar Livro' : '➕ Adicionar Novo Livro'}</h3>
         <button id="btn-close-book-modal" class="btn btn-secondary btn-sm" style="border:none;">✕</button>
@@ -313,8 +367,11 @@ function openBookModal(book, onSave) {
     </dialog>
   `;
 
-  document.getElementById('btn-close-book-modal').addEventListener('click', () => portal.innerHTML = '');
-  document.getElementById('btn-cancel-book').addEventListener('click', () => portal.innerHTML = '');
+  const closeModal = () => portal.innerHTML = '';
+
+  document.getElementById('btn-close-book-modal').addEventListener('click', closeModal);
+  document.getElementById('btn-cancel-book').addEventListener('click', closeModal);
+  document.getElementById('backdrop-book-modal').addEventListener('click', closeModal);
 
   document.getElementById('btn-save-book').addEventListener('click', () => {
     const title = document.getElementById('book-title').value.trim();
@@ -345,7 +402,7 @@ function openBookModal(book, onSave) {
       showToast('Livro adicionado ao acervo!', 'success');
     }
 
-    portal.innerHTML = '';
+    closeModal();
     if (onSave) onSave();
   });
 }
@@ -353,7 +410,8 @@ function openBookModal(book, onSave) {
 function openBookDetailModal(book) {
   const portal = document.getElementById('book-modal-portal');
   portal.innerHTML = `
-    <dialog id="modal-book-detail" class="custom-modal" style="display:block;">
+    <div class="modal-backdrop-overlay" id="backdrop-detail-modal"></div>
+    <dialog id="modal-book-detail" class="custom-modal" open>
       <div class="modal-header">
         <h3>📖 Detalhes da Obra</h3>
         <button id="btn-close-detail" class="btn btn-secondary btn-sm" style="border:none;">✕</button>
@@ -392,6 +450,9 @@ function openBookDetailModal(book) {
     </dialog>
   `;
 
-  document.getElementById('btn-close-detail').addEventListener('click', () => portal.innerHTML = '');
-  document.getElementById('btn-close-detail-footer').addEventListener('click', () => portal.innerHTML = '');
+  const closeModal = () => portal.innerHTML = '';
+
+  document.getElementById('btn-close-detail').addEventListener('click', closeModal);
+  document.getElementById('btn-close-detail-footer').addEventListener('click', closeModal);
+  document.getElementById('backdrop-detail-modal').addEventListener('click', closeModal);
 }

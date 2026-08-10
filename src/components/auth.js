@@ -3,9 +3,10 @@ import { showToast } from './toast.js';
 
 export function renderAuthModal(container, onSuccess) {
   const modalHtml = `
-    <dialog id="auth-modal" class="custom-modal" style="display: block;">
+    <div class="modal-backdrop-overlay" id="backdrop-auth-modal"></div>
+    <dialog id="auth-modal" class="custom-modal" open>
       <div class="modal-header">
-        <h3 id="auth-modal-title">🔐 Iniciar Sessão na Biblioteca</h3>
+        <h3 id="auth-modal-title">🌿 Sessão - Biblioteca Camomila</h3>
       </div>
       <form id="auth-form" class="modal-body">
         <div class="form-group">
@@ -18,7 +19,7 @@ export function renderAuthModal(container, onSuccess) {
 
         <div class="form-group">
           <label>Endereço de Email</label>
-          <input type="email" id="auth-email" placeholder="exemplo@biblioteca.pt" required value="manuelgasparm@gmail.com">
+          <input type="email" id="auth-email" placeholder="exemplo@bibliotecacamomila.pt" required value="manuelgasparm@gmail.com">
         </div>
 
         <div class="form-group" id="name-group" style="display: none;">

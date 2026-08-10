@@ -15,7 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function initApp() {
   const currentUser = store.getCurrentUser();
-  updateUserUI(currentUser);
+  
+  // Mobile Sidebar Drawer Setup
+  setupMobileDrawer();
 
   // Setup View Router Navigation
   const navItems = document.querySelectorAll('.nav-item');
@@ -24,6 +26,7 @@ function initApp() {
       e.preventDefault();
       const targetView = e.currentTarget.dataset.view;
       switchView(targetView);
+      closeMobileDrawer();
     });
   });
 
@@ -36,17 +39,29 @@ function initApp() {
     }
   });
 
-  // Theme Toggle
-  const themeBtn = document.getElementById('btn-theme-toggle');
+  // Theme Selector Setup (5 Curated Themes)
+  const themeSelector = document.getElementById('theme-selector');
   let currentTheme = localStorage.getItem('library_theme') || 'dark';
   document.documentElement.setAttribute('data-theme', currentTheme);
 
-  themeBtn.addEventListener('click', () => {
-    currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', currentTheme);
-    localStorage.setItem('library_theme', currentTheme);
-    showToast(`Tema ${currentTheme === 'dark' ? 'Escuro' : 'Claro'} activado`, 'info');
-  });
+  if (themeSelector) {
+    themeSelector.value = currentTheme;
+    themeSelector.addEventListener('change', (e) => {
+      currentTheme = e.target.value;
+      document.documentElement.setAttribute('data-theme', currentTheme);
+      localStorage.setItem('library_theme', currentTheme);
+
+      const themeNames = {
+        dark: '🌙 Escuro (Midnight)',
+        light: '☀️ Claro (Nórdico)',
+        camomila: '🌿 Camomila (Verde)',
+        parchment: '📜 Pergaminho (Sépia)',
+        violet: '💜 Violeta (Cyber)'
+      };
+
+      showToast(`Tema ${themeNames[currentTheme] || currentTheme} activado`, 'info');
+    });
+  }
 
   // Logout Click Listener
   document.getElementById('btn-logout').addEventListener('click', (e) => {
@@ -66,8 +81,37 @@ function initApp() {
     renderCurrentView();
   });
 
-  // Render Initial View
+  updateUserUI(currentUser);
   renderCurrentView();
+}
+
+function setupMobileDrawer() {
+  const mobileToggle = document.getElementById('btn-mobile-toggle');
+  const sidebar = document.querySelector('.sidebar');
+
+  let backdrop = document.getElementById('sidebar-backdrop');
+  if (!backdrop) {
+    backdrop = document.createElement('div');
+    backdrop.id = 'sidebar-backdrop';
+    backdrop.className = 'sidebar-backdrop';
+    document.body.appendChild(backdrop);
+  }
+
+  if (mobileToggle) {
+    mobileToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('mobile-open');
+      backdrop.classList.toggle('active');
+    });
+  }
+
+  backdrop.addEventListener('click', closeMobileDrawer);
+}
+
+function closeMobileDrawer() {
+  const sidebar = document.querySelector('.sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  if (sidebar) sidebar.classList.remove('mobile-open');
+  if (backdrop) backdrop.classList.remove('active');
 }
 
 function updateUserUI(user) {
@@ -77,19 +121,49 @@ function updateUserUI(user) {
   const nameDisplay = document.getElementById('user-name-display');
   const avatar = document.getElementById('user-avatar');
 
-  if (user) {
-    nameDisplay.textContent = user.name;
-    avatar.textContent = user.name.charAt(0).toUpperCase();
+  if (!user) return;
 
-    if (user.role === 'librarian') {
-      badgeLabel.textContent = 'Bibliotecário';
-      badgeIcon.textContent = '👑';
-      roleBadge.className = 'role-badge';
+  nameDisplay.textContent = user.name;
+  avatar.textContent = user.name.charAt(0).toUpperCase();
+
+  const isLibrarian = user.role === 'librarian';
+
+  if (isLibrarian) {
+    badgeLabel.textContent = 'Bibliotecário';
+    badgeIcon.textContent = '👑';
+    roleBadge.className = 'role-badge';
+  } else {
+    badgeLabel.textContent = 'Leitor';
+    badgeIcon.textContent = '👤';
+    roleBadge.className = 'role-badge patron';
+  }
+
+  // Filter navigation bar items based on user role
+  const navItems = document.querySelectorAll('.nav-item');
+  navItems.forEach(item => {
+    const view = item.dataset.view;
+    if (!isLibrarian) {
+      // Patron view: only show catalog & loans (My Loans)
+      if (view === 'catalog' || view === 'loans') {
+        item.style.display = 'flex';
+        if (view === 'loans') {
+          item.innerHTML = '<span>🔄</span> Os Meus Empréstimos';
+        }
+      } else {
+        item.style.display = 'none';
+      }
     } else {
-      badgeLabel.textContent = 'Leitor';
-      badgeIcon.textContent = '👤';
-      roleBadge.className = 'role-badge patron';
+      // Librarian view: show all items
+      item.style.display = 'flex';
+      if (view === 'loans') {
+        item.innerHTML = '<span>🔄</span> Empréstimos';
+      }
     }
+  });
+
+  // If Patron attempts to view admin-only pages, redirect to catalog
+  if (!isLibrarian && (currentView === 'dashboard' || currentView === 'members' || currentView === 'settings')) {
+    switchView('catalog');
   }
 }
 
@@ -127,7 +201,7 @@ function renderCurrentView() {
       renderSettings(viewport);
       break;
     default:
-      renderDashboard(viewport);
+      renderCatalog(viewport);
   }
 }
 

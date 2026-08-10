@@ -127,7 +127,8 @@ function openMemberModal(member, onSave) {
   const isEdit = !!member;
 
   portal.innerHTML = `
-    <dialog id="modal-member-form" class="custom-modal" style="display:block;">
+    <div class="modal-backdrop-overlay" id="backdrop-member-modal"></div>
+    <dialog id="modal-member-form" class="custom-modal" open>
       <div class="modal-header">
         <h3>${isEdit ? '✏️ Editar Leitor' : '➕ Registar Novo Leitor'}</h3>
         <button id="btn-close-member-modal" class="btn btn-secondary btn-sm" style="border:none;">✕</button>
@@ -165,8 +166,11 @@ function openMemberModal(member, onSave) {
     </dialog>
   `;
 
-  document.getElementById('btn-close-member-modal').addEventListener('click', () => portal.innerHTML = '');
-  document.getElementById('btn-cancel-member').addEventListener('click', () => portal.innerHTML = '');
+  const closeModal = () => portal.innerHTML = '';
+
+  document.getElementById('btn-close-member-modal').addEventListener('click', closeModal);
+  document.getElementById('btn-cancel-member').addEventListener('click', closeModal);
+  document.getElementById('backdrop-member-modal').addEventListener('click', closeModal);
 
   document.getElementById('btn-save-member').addEventListener('click', () => {
     const fullName = document.getElementById('member-fullname').value.trim();
@@ -192,7 +196,7 @@ function openMemberModal(member, onSave) {
       showToast('Novo leitor registado com sucesso!', 'success');
     }
 
-    portal.innerHTML = '';
+    closeModal();
     if (onSave) onSave();
   });
 }

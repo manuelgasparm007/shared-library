@@ -24,7 +24,7 @@ export function renderDashboard(container) {
   const dashboardHtml = `
     <div class="dashboard-header" style="display:flex; justify-content:space-between; align-items:center;">
       <div>
-        <h2 style="font-size:1.8rem;">Painel de Controlo da Biblioteca</h2>
+        <h2 style="font-size:1.8rem;">Painel de Controlo - Biblioteca Camomila</h2>
         <p style="color:var(--text-muted); font-size:0.9rem;">Visão geral do acervo, requisições activas e estatísticas</p>
       </div>
       ${isLibrarian ? `
