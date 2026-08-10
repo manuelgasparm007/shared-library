@@ -44,7 +44,8 @@ class LibraryStore extends EventTarget {
         email: m["Endereço de Email"],
         phone: m["Número de Telefone"],
         joinedDate: m["Data de Inscrição"] || new Date().toISOString().split('T')[0],
-        role: m["Role"] || "patron"
+        role: m["Role"] || "patron",
+        password: m["Password"] || "123456"
       }));
 
       if (!formattedMembers.some(m => m.role === 'librarian')) {
@@ -98,23 +99,35 @@ class LibraryStore extends EventTarget {
 
   // --- Auth Session Methods ---
   getCurrentUser() {
-    const userStr = localStorage.getItem(STORAGE_KEYS.USER);
-    return userStr ? JSON.parse(userStr) : null;
+    try {
+      const fromLocal = localStorage.getItem(STORAGE_KEYS.USER);
+      if (fromLocal) return JSON.parse(fromLocal);
+    } catch (e) {}
+    try {
+      const fromSession = sessionStorage.getItem(STORAGE_KEYS.USER);
+      if (fromSession) return JSON.parse(fromSession);
+    } catch (e) {}
+    return null;
   }
 
   setCurrentUser(user) {
     if (user) {
-      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+      try {
+        localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+      } catch (e) {}
+      try {
+        sessionStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+      } catch (e) {}
     } else {
-      localStorage.removeItem(STORAGE_KEYS.USER);
+      try { localStorage.removeItem(STORAGE_KEYS.USER); } catch (e) {}
+      try { sessionStorage.removeItem(STORAGE_KEYS.USER); } catch (e) {}
     }
     this.notifyChange();
   }
 
   logout() {
-    localStorage.removeItem(STORAGE_KEYS.USER);
-    sessionStorage.clear();
-    // Clear cookies
+    try { localStorage.removeItem(STORAGE_KEYS.USER); } catch (e) {}
+    try { sessionStorage.clear(); } catch (e) {}
     document.cookie.split(";").forEach((c) => {
       document.cookie = c
         .replace(/^ +/, "")
@@ -127,24 +140,23 @@ class LibraryStore extends EventTarget {
     if (!email || !email.trim()) {
       throw new Error('Por favor insira um endereço de email.');
     }
-    const cleanEmail = email.trim().toLowerCase();
-    const members = this.getMembers();
-    let existing = members.find(m => m.email && m.email.trim().toLowerCase() === cleanEmail);
+    // Clean mobile keyboard hidden spaces & zero-width characters
+    const cleanEmail = email.replace(/[\u200B-\u200D\uFEFF\xA0]/g, '').trim().toLowerCase();
+    const cleanPassword = (password || '').replace(/[\u200B-\u200D\uFEFF\xA0]/g, '').trim();
 
-    if (!existing && (cleanEmail === 'admin' || cleanEmail.includes('admin@camomila'))) {
-      existing = members.find(m => m.role === 'librarian');
-    }
+    const members = this.getMembers();
+    let existing = members.find(m => m.email && m.email.replace(/[\u200B-\u200D\uFEFF\xA0]/g, '').trim().toLowerCase() === cleanEmail);
 
     if (!existing) {
-      throw new Error(`Endereço de email "${email}" não encontrado. Se ainda não tem conta, por favor registe-se.`);
+      throw new Error(`Endereço de email "${email.trim()}" não encontrado. Se ainda não tem conta, por favor registe-se.`);
     }
 
     if (existing.status === 'pending') {
       throw new Error('A sua conta foi registada, mas ainda se encontra A AGUARDAR APROVAÇÃO pelo Bibliotecário.');
     }
 
-    const expectedPassword = existing.password || '123456';
-    if (password && password.trim() !== expectedPassword) {
+    const expectedPassword = (existing.password || '123456').replace(/[\u200B-\u200D\uFEFF\xA0]/g, '').trim();
+    if (cleanPassword && cleanPassword !== expectedPassword) {
       throw new Error('Palavra-passe incorreta. Por favor verifique os seus dados e tente novamente.');
     }
 
@@ -236,7 +248,7 @@ class LibraryStore extends EventTarget {
 
   getMembers() {
     let members = JSON.parse(localStorage.getItem(STORAGE_KEYS.MEMBERS)) || [];
-    if (!members.some(m => m.email && m.email.toLowerCase() === 'admin@camomila.pt')) {
+    if (!members.some(m => m.role === 'librarian')) {
       members.unshift({
         id: 'M000',
         fullName: 'Bibliotecário Principal',
@@ -244,7 +256,8 @@ class LibraryStore extends EventTarget {
         phone: '+351 900 000 000',
         joinedDate: new Date().toISOString().split('T')[0],
         role: 'librarian',
-        status: 'approved'
+        status: 'approved',
+        password: '123456'
       });
       localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(members));
     }

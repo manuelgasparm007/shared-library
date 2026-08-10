@@ -127,6 +127,11 @@
   --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.6), 0 0 1px 1px var(--border-glass);
 }
 
+/* Base Typography & Font Size */
+html {
+  font-size: 93.75%; /* Slightly reduces overall letter size across the entire app (~15px base) */
+}
+
 /* Reset & Box Sizing */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -797,6 +802,11 @@ select option {
   display: none;
 }
 
+/* Mobile Bottom Navigation Bar */
+.mobile-bottom-nav {
+  display: none;
+}
+
 /* Responsive adjustments */
 @media (max-width: 900px) {
   .mobile-toggle-btn {
@@ -839,15 +849,66 @@ select option {
   }
 
   .top-header {
-    padding: 0 1rem;
+    padding: 0 0.85rem;
   }
 
   .header-search {
-    width: 150px;
+    width: 140px;
   }
 
   .content-viewport {
     padding: 1rem;
+    padding-bottom: 85px !important;
+  }
+
+  /* Mobile Bottom Navigation Bar */
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 62px;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-glass);
+    backdrop-filter: blur(20px);
+    z-index: 9900;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 0.2rem;
+    box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.4);
+  }
+
+  .mobile-bottom-nav .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.3rem 0;
+    gap: 3px;
+    text-decoration: none;
+    color: var(--text-muted);
+    font-size: 0.68rem;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+
+  .mobile-bottom-nav .nav-item .nav-icon {
+    font-size: 1.2rem;
+    line-height: 1;
+  }
+
+  .mobile-bottom-nav .nav-item.active {
+    color: var(--accent-primary);
+    background: rgba(99, 102, 241, 0.12);
+  }
+
+  .table-container {
+    -webkit-overflow-scrolling: touch;
+    border-radius: var(--radius-md);
   }
 }
 

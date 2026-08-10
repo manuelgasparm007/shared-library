@@ -25,12 +25,12 @@ export function renderLandingAuth(container, onSuccess) {
 
           <div class="form-group">
             <label>Endereço de Email *</label>
-            <input type="email" id="login-email" placeholder="seu.email@exemplo.pt" required value="admin@camomila.pt" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="email">
+            <input type="email" id="login-email" placeholder="seu.email@exemplo.pt" required autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="email">
           </div>
 
           <div class="form-group">
-            <label>Palavra-passe (Demo) *</label>
-            <input type="password" id="login-password" value="123456" placeholder="••••••••" required>
+            <label>Palavra-passe *</label>
+            <input type="password" id="login-password" placeholder="••••••••" required autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="current-password">
           </div>
 
           <button type="submit" class="btn btn-primary btn-landing">Entrar na Biblioteca</button>
@@ -47,7 +47,7 @@ export function renderLandingAuth(container, onSuccess) {
 
           <div class="form-group">
             <label>Endereço de Email *</label>
-            <input type="email" id="reg-email" placeholder="maria.santos@exemplo.pt" required>
+            <input type="email" id="reg-email" placeholder="maria.santos@exemplo.pt" required autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="email">
           </div>
 
           <div class="form-group">
@@ -57,7 +57,7 @@ export function renderLandingAuth(container, onSuccess) {
 
           <div class="form-group">
             <label>Palavra-passe *</label>
-            <input type="password" id="reg-password" value="123456" placeholder="••••••••" required>
+            <input type="password" id="reg-password" placeholder="••••••••" required autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="new-password">
           </div>
 
           <div style="font-size:0.78rem; color:var(--text-muted); background:var(--bg-glass); padding:0.65rem; border-radius:var(--radius-sm); border:1px solid var(--border-glass);">
@@ -66,17 +66,6 @@ export function renderLandingAuth(container, onSuccess) {
 
           <button type="submit" class="btn btn-primary btn-landing">Registar Conta de Leitor</button>
         </form>
-
-        <!-- Demo Credentials Hints -->
-        <div class="landing-demo-hints" id="demo-hints-box">
-          <div style="font-weight:700; font-size:0.8rem; color:var(--text-muted); margin-bottom:0.4rem;">💡 Contas de Demonstração (Clique para preencher):</div>
-          <div class="demo-chip" id="demo-admin">
-            <span>👑 Admin / Bibliotecário:</span> <code>admin@camomila.pt</code>
-          </div>
-          <div class="demo-chip" id="demo-patron">
-            <span>👤 Leitor / Membro:</span> <code>manuelgasparm@gmail.com</code>
-          </div>
-        </div>
       </div>
     </div>
   `;
@@ -87,7 +76,6 @@ export function renderLandingAuth(container, onSuccess) {
   const tabRegister = document.getElementById('tab-register');
   const formLogin = document.getElementById('form-login');
   const formRegister = document.getElementById('form-register');
-  const demoBox = document.getElementById('demo-hints-box');
   const loginEmail = document.getElementById('login-email');
 
   // Tab Switcher
@@ -98,7 +86,6 @@ export function renderLandingAuth(container, onSuccess) {
     tabRegister.style.color = 'var(--text-muted)';
     formLogin.style.display = 'flex';
     formRegister.style.display = 'none';
-    demoBox.style.display = 'flex';
   });
 
   tabRegister.addEventListener('click', () => {
@@ -108,16 +95,6 @@ export function renderLandingAuth(container, onSuccess) {
     tabLogin.style.color = 'var(--text-muted)';
     formRegister.style.display = 'flex';
     formLogin.style.display = 'none';
-    demoBox.style.display = 'none';
-  });
-
-  // Demo Credentials
-  document.getElementById('demo-admin').addEventListener('click', () => {
-    loginEmail.value = 'admin@camomila.pt';
-  });
-
-  document.getElementById('demo-patron').addEventListener('click', () => {
-    loginEmail.value = 'manuelgasparm@gmail.com';
   });
 
   // Login Form Submission

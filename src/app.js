@@ -132,12 +132,19 @@ function updateUserUI(user) {
   const navItems = document.querySelectorAll('.nav-item');
   navItems.forEach(item => {
     const view = item.dataset.view;
+    const isMobileItem = item.classList.contains('mobile-nav-item');
+
     if (!isLibrarian) {
       // Patron view: show catalog, loans (Os Meus Empréstimos), AND settings (Definições)
       if (view === 'catalog' || view === 'loans' || view === 'settings') {
         item.style.display = 'flex';
         if (view === 'loans') {
-          item.innerHTML = '<span>🔄</span> Os Meus Empréstimos';
+          if (isMobileItem) {
+            const label = item.querySelector('.nav-label');
+            if (label) label.textContent = 'Os Meus';
+          } else {
+            item.innerHTML = '<span>🔄</span> Os Meus Empréstimos';
+          }
         }
       } else {
         item.style.display = 'none';
@@ -146,7 +153,12 @@ function updateUserUI(user) {
       // Librarian view: show all items
       item.style.display = 'flex';
       if (view === 'loans') {
-        item.innerHTML = '<span>🔄</span> Empréstimos';
+        if (isMobileItem) {
+          const label = item.querySelector('.nav-label');
+          if (label) label.textContent = 'Empréstimos';
+        } else {
+          item.innerHTML = '<span>🔄</span> Empréstimos';
+        }
       }
     }
   });

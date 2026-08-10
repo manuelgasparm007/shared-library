@@ -77,8 +77,35 @@
       <main id="content-viewport" class="content-viewport">
         <!-- Rendered view components go here -->
       </main>
+
+      <!-- Mobile Bottom Navigation Bar -->
+      <nav class="mobile-bottom-nav">
+        <a class="nav-item mobile-nav-item" data-view="dashboard">
+          <span class="nav-icon">📊</span>
+          <span class="nav-label">Painel</span>
+        </a>
+        <a class="nav-item mobile-nav-item" data-view="catalog">
+          <span class="nav-icon">📖</span>
+          <span class="nav-label">Catálogo</span>
+        </a>
+        <a class="nav-item mobile-nav-item" data-view="members">
+          <span class="nav-icon">👥</span>
+          <span class="nav-label">Leitores</span>
+        </a>
+        <a class="nav-item mobile-nav-item" data-view="loans">
+          <span class="nav-icon">🔄</span>
+          <span class="nav-label">Empréstimos</span>
+        </a>
+        <a class="nav-item mobile-nav-item" data-view="settings">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-label">Definições</span>
+        </a>
+      </nav>
     </div>
   </div>
+
+  <!-- Mobile Overlay Backdrop -->
+  <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
 
   <!-- Portal Containers -->
   <div id="auth-portal"></div>
