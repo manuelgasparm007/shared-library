@@ -7,7 +7,8 @@ const STORAGE_KEYS = {
   GENRES: 'shared_library_genres',
   STATUSES: 'shared_library_statuses',
   USER: 'shared_library_current_user',
-  CLOUD_CONFIG: 'shared_library_cloud_config'
+  CLOUD_CONFIG: 'shared_library_cloud_config',
+  LOGS: 'shared_library_toast_logs'
 };
 
 class LibraryStore extends EventTarget {
@@ -123,12 +124,19 @@ class LibraryStore extends EventTarget {
   }
 
   login(email) {
-    const members = this.getMembers();
+    if (!email || !email.trim()) {
+      throw new Error('Por favor insira um endereço de email.');
+    }
     const cleanEmail = email.trim().toLowerCase();
-    const existing = members.find(m => m.email.toLowerCase() === cleanEmail);
+    const members = this.getMembers();
+    let existing = members.find(m => m.email && m.email.trim().toLowerCase() === cleanEmail);
+
+    if (!existing && (cleanEmail === 'admin' || cleanEmail.includes('admin@camomila'))) {
+      existing = members.find(m => m.role === 'librarian');
+    }
 
     if (!existing) {
-      throw new Error('Endereço de email não encontrado no registo. Por favor crie uma conta.');
+      throw new Error(`Endereço de email "${email}" não encontrado. Se ainda não tem conta, por favor registe-se.`);
     }
 
     if (existing.status === 'pending') {
@@ -151,9 +159,19 @@ class LibraryStore extends EventTarget {
     this.notifyChange();
   }
 
-  // --- Books Methods ---
   getBooks() {
-    return JSON.parse(localStorage.getItem(STORAGE_KEYS.BOOKS)) || [];
+    const books = JSON.parse(localStorage.getItem(STORAGE_KEYS.BOOKS)) || [];
+    const loans = JSON.parse(localStorage.getItem(STORAGE_KEYS.LOANS)) || [];
+    const activeLoanBookIds = new Set(
+      loans.filter(l => l.status === 'Emprestado').map(l => l.bookId)
+    );
+
+    return books.map(book => {
+      if (activeLoanBookIds.has(book.id)) {
+        return { ...book, status: 'Emprestado' };
+      }
+      return book;
+    });
   }
 
   getBookById(id) {
@@ -211,9 +229,21 @@ class LibraryStore extends EventTarget {
     this.deleteBookFromCloud(id);
   }
 
-  // --- Members Methods ---
   getMembers() {
-    return JSON.parse(localStorage.getItem(STORAGE_KEYS.MEMBERS)) || [];
+    let members = JSON.parse(localStorage.getItem(STORAGE_KEYS.MEMBERS)) || [];
+    if (!members.some(m => m.email && m.email.toLowerCase() === 'admin@camomila.pt')) {
+      members.unshift({
+        id: 'M000',
+        fullName: 'Bibliotecário Principal',
+        email: 'admin@camomila.pt',
+        phone: '+351 900 000 000',
+        joinedDate: new Date().toISOString().split('T')[0],
+        role: 'librarian',
+        status: 'approved'
+      });
+      localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(members));
+    }
+    return members;
   }
 
   addMember(memberData) {
@@ -274,6 +304,25 @@ class LibraryStore extends EventTarget {
 
     // Async sync to cloud
     this.syncMemberToCloud(updatedMember);
+  }
+
+  updateMemberPassword(memberId, newPassword) {
+    let members = this.getMembers();
+    const member = members.find(m => m.id === memberId);
+    if (!member) throw new Error('Membro não encontrado');
+
+    const updatedMember = { ...member, password: newPassword };
+    members = members.map(m => m.id === memberId ? updatedMember : m);
+    localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(members));
+
+    const currentUser = this.getCurrentUser();
+    if (currentUser && (currentUser.id === memberId || currentUser.email === member.email)) {
+      this.setCurrentUser({ ...currentUser, password: newPassword });
+    }
+
+    this.notifyChange();
+    this.syncMemberToCloud(updatedMember);
+    return updatedMember;
   }
 
   deleteMember(id) {
@@ -430,7 +479,18 @@ class LibraryStore extends EventTarget {
 
   // --- Supabase Cloud REST Sync ---
   getCloudConfig() {
-    return JSON.parse(localStorage.getItem(STORAGE_KEYS.CLOUD_CONFIG)) || { url: '', key: '' };
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEYS.CLOUD_CONFIG));
+    if (saved && saved.url && saved.key) {
+      return saved;
+    }
+
+    const envUrl = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_URL) ? import.meta.env.VITE_SUPABASE_URL.trim() : '';
+    const envKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_ANON_KEY) ? import.meta.env.VITE_SUPABASE_ANON_KEY.trim() : '';
+
+    return {
+      url: envUrl || (saved ? saved.url : ''),
+      key: envKey || (saved ? saved.key : '')
+    };
   }
 
   setCloudConfig(url, key) {
@@ -667,6 +727,48 @@ class LibraryStore extends EventTarget {
     } catch (e) {
       console.error('Fetch from cloud error:', e);
     }
+  }
+
+  // --- Toast Logging Methods ---
+  getToastLogs() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.LOGS)) || [];
+  }
+
+  addToastLog(message, type = 'info') {
+    const logs = this.getToastLogs();
+    const currentUser = this.getCurrentUser();
+    const newLog = {
+      id: `LOG_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+      timestamp: new Date().toLocaleString('pt-PT'),
+      rawDate: new Date().toISOString(),
+      message,
+      type,
+      user: currentUser ? currentUser.name : 'Sistema / Convidado',
+      userEmail: currentUser ? currentUser.email : 'N/A'
+    };
+
+    logs.unshift(newLog);
+    if (logs.length > 500) logs.pop();
+
+    localStorage.setItem(STORAGE_KEYS.LOGS, JSON.stringify(logs));
+    this.notifyChange();
+    return newLog;
+  }
+
+  clearToastLogs() {
+    localStorage.removeItem(STORAGE_KEYS.LOGS);
+    this.notifyChange();
+  }
+
+  exportToastLogs() {
+    const logs = this.getToastLogs();
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(logs, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `registos_popups_camomila_${new Date().toISOString().split('T')[0]}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
   }
 }
 

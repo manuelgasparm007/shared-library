@@ -21,9 +21,11 @@ export function renderLandingAuth(container, onSuccess) {
 
         <!-- Login Form -->
         <form id="form-login" class="landing-form">
+          <div id="login-error-banner" style="display:none; padding:0.75rem; background:rgba(239, 68, 68, 0.15); border:1px solid rgba(239, 68, 68, 0.4); color:#ef4444; border-radius:var(--radius-md); font-size:0.85rem; font-weight:600;"></div>
+
           <div class="form-group">
             <label>Endereço de Email *</label>
-            <input type="email" id="login-email" placeholder="seu.email@exemplo.pt" required value="admin@camomila.pt">
+            <input type="email" id="login-email" placeholder="seu.email@exemplo.pt" required value="admin@camomila.pt" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="email">
           </div>
 
           <div class="form-group">
@@ -36,6 +38,8 @@ export function renderLandingAuth(container, onSuccess) {
 
         <!-- Registration Form -->
         <form id="form-register" class="landing-form" style="display:none;">
+          <div id="reg-error-banner" style="display:none; padding:0.75rem; background:rgba(239, 68, 68, 0.15); border:1px solid rgba(239, 68, 68, 0.4); color:#ef4444; border-radius:var(--radius-md); font-size:0.85rem; font-weight:600;"></div>
+
           <div class="form-group">
             <label>Nome Completo *</label>
             <input type="text" id="reg-name" placeholder="Ex: Maria Santos" required>
@@ -120,13 +124,20 @@ export function renderLandingAuth(container, onSuccess) {
   formLogin.addEventListener('submit', (e) => {
     e.preventDefault();
     const email = loginEmail.value.trim();
+    const loginErrorBanner = document.getElementById('login-error-banner');
+
+    if (loginErrorBanner) loginErrorBanner.style.display = 'none';
 
     try {
       const user = store.login(email);
       showToast(`Bem-vindo, ${user.name}!`, 'success');
       if (onSuccess) onSuccess(user);
     } catch (err) {
-      showToast(err.message, 'error');
+      if (loginErrorBanner) {
+        loginErrorBanner.innerHTML = `⚠️ <strong>Erro de Login:</strong> ${err.message}`;
+        loginErrorBanner.style.display = 'block';
+      }
+      showToast(`Erro ao entrar: ${err.message}`, 'error');
     }
   });
 
@@ -136,6 +147,9 @@ export function renderLandingAuth(container, onSuccess) {
     const fullName = document.getElementById('reg-name').value.trim();
     const email = document.getElementById('reg-email').value.trim();
     const phone = document.getElementById('reg-phone').value.trim();
+    const regErrorBanner = document.getElementById('reg-error-banner');
+
+    if (regErrorBanner) regErrorBanner.style.display = 'none';
 
     try {
       store.registerNewUser({ fullName, email, phone });
@@ -145,7 +159,11 @@ export function renderLandingAuth(container, onSuccess) {
       loginEmail.value = email;
       tabLogin.click();
     } catch (err) {
-      showToast(err.message, 'error');
+      if (regErrorBanner) {
+        regErrorBanner.innerHTML = `⚠️ <strong>Erro de Registo:</strong> ${err.message}`;
+        regErrorBanner.style.display = 'block';
+      }
+      showToast(`Erro ao registar: ${err.message}`, 'error');
     }
   });
 }

@@ -5,11 +5,17 @@ let currentViewMode = 'table'; // 'table' or 'grid'
 let searchQuery = '';
 let selectedGenre = 'ALL';
 let selectedStatus = 'ALL';
-let sortBy = 'title_asc'; // 'title_asc', 'title_desc', 'author_asc', 'year_desc', 'year_asc', 'status_avail', 'id_asc'
+let sortBy = 'id_asc';
 
 export function setCatalogFilter({ genre, status } = {}) {
   if (genre !== undefined) selectedGenre = genre;
   if (status !== undefined) selectedStatus = status;
+}
+
+export function resetCatalogFilters() {
+  selectedGenre = 'ALL';
+  selectedStatus = 'ALL';
+  searchQuery = '';
 }
 
 // Global helper for querying Google Books & Open Library APIs
@@ -153,10 +159,10 @@ export function renderCatalog(container) {
         return (a.isbn || '').localeCompare(b.isbn || '');
       case 'isbn_desc':
         return (b.isbn || '').localeCompare(a.isbn || '');
-      case 'status_borrowed':
-        return (b.status === 'Disponível' ? 0 : 1) - (a.status === 'Disponível' ? 0 : 1);
-      case 'status_avail':
-        return (a.status === 'Disponível' ? 0 : 1) - (b.status === 'Disponível' ? 0 : 1);
+      case 'status_asc':
+        return (a.status || '').localeCompare(b.status || '', 'pt');
+      case 'status_desc':
+        return (b.status || '').localeCompare(a.status || '', 'pt');
       case 'id_asc':
       default:
         return a.id.localeCompare(b.id, 'en', { numeric: true });
@@ -206,13 +212,20 @@ export function renderCatalog(container) {
 
       <div class="form-group" style="margin:0;">
         <select id="catalog-sort-filter">
-          <option value="title_asc" ${sortBy === 'title_asc' ? 'selected' : ''}>🔤 Ordenar: Título (A - Z)</option>
-          <option value="title_desc" ${sortBy === 'title_desc' ? 'selected' : ''}>🔤 Ordenar: Título (Z - A)</option>
-          <option value="author_asc" ${sortBy === 'author_asc' ? 'selected' : ''}>👤 Ordenar: Autor (A - Z)</option>
-          <option value="year_desc" ${sortBy === 'year_desc' ? 'selected' : ''}>📅 Ordenar: Ano (Mais Recente)</option>
-          <option value="year_asc" ${sortBy === 'year_asc' ? 'selected' : ''}>📅 Ordenar: Ano (Mais Antigo)</option>
-          <option value="status_avail" ${sortBy === 'status_avail' ? 'selected' : ''}>🟢 Ordenar: Disponibilidade</option>
-          <option value="id_asc" ${sortBy === 'id_asc' ? 'selected' : ''}>🔢 Ordenar: ID Livro (001...)</option>
+          <option value="id_asc" ${sortBy === 'id_asc' ? 'selected' : ''}>🔢 ID Livro (Crescente)</option>
+          <option value="id_desc" ${sortBy === 'id_desc' ? 'selected' : ''}>🔢 ID Livro (Decrescente)</option>
+          <option value="title_asc" ${sortBy === 'title_asc' ? 'selected' : ''}>🔤 Título (A - Z)</option>
+          <option value="title_desc" ${sortBy === 'title_desc' ? 'selected' : ''}>🔤 Título (Z - A)</option>
+          <option value="author_asc" ${sortBy === 'author_asc' ? 'selected' : ''}>👤 Autor (A - Z)</option>
+          <option value="author_desc" ${sortBy === 'author_desc' ? 'selected' : ''}>👤 Autor (Z - A)</option>
+          <option value="genre_asc" ${sortBy === 'genre_asc' ? 'selected' : ''}>🏷️ Género (A - Z)</option>
+          <option value="genre_desc" ${sortBy === 'genre_desc' ? 'selected' : ''}>🏷️ Género (Z - A)</option>
+          <option value="year_desc" ${sortBy === 'year_desc' ? 'selected' : ''}>📅 Ano (Mais Recente)</option>
+          <option value="year_asc" ${sortBy === 'year_asc' ? 'selected' : ''}>📅 Ano (Mais Antigo)</option>
+          <option value="isbn_asc" ${sortBy === 'isbn_asc' ? 'selected' : ''}>📑 ISBN (A - Z)</option>
+          <option value="isbn_desc" ${sortBy === 'isbn_desc' ? 'selected' : ''}>📑 ISBN (Z - A)</option>
+          <option value="status_asc" ${sortBy === 'status_asc' ? 'selected' : ''}>🟢 Estado (A - Z)</option>
+          <option value="status_desc" ${sortBy === 'status_desc' ? 'selected' : ''}>🔴 Estado (Z - A)</option>
         </select>
       </div>
     </div>
@@ -246,10 +259,18 @@ export function renderCatalog(container) {
   });
 
   const searchInput = document.getElementById('catalog-search-input');
-  searchInput.addEventListener('input', (e) => {
-    searchQuery = e.target.value;
-    renderCatalog(container);
-  });
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      const cursorPos = e.target.selectionStart;
+      renderCatalog(container);
+      const newInp = document.getElementById('catalog-search-input');
+      if (newInp) {
+        newInp.focus();
+        newInp.setSelectionRange(cursorPos, cursorPos);
+      }
+    });
+  }
 
   document.getElementById('catalog-genre-filter').addEventListener('change', (e) => {
     selectedGenre = e.target.value;
@@ -409,11 +430,11 @@ function renderTable(books, isLibrarian) {
           <tr>
             <th class="sortable-header" data-sort-target="${sortBy === 'id_asc' ? 'id_desc' : 'id_asc'}" style="cursor:pointer;" title="Ordenar por ID">ID${sortBy === 'id_asc' ? ' ▲' : (sortBy === 'id_desc' ? ' ▼' : '')}</th>
             <th class="sortable-header" data-sort-target="${sortBy === 'title_asc' ? 'title_desc' : 'title_asc'}" style="cursor:pointer;" title="Ordenar por Título">Título${sortBy === 'title_asc' ? ' ▲' : (sortBy === 'title_desc' ? ' ▼' : '')}</th>
-            <th class="sortable-header" data-sort-target="${sortBy === 'author_asc' ? 'author_desc' : 'author_desc'}" style="cursor:pointer;" title="Ordenar por Autor">Autor${sortBy === 'author_asc' ? ' ▲' : (sortBy === 'author_desc' ? ' ▼' : '')}</th>
+            <th class="sortable-header" data-sort-target="${sortBy === 'author_asc' ? 'author_desc' : 'author_asc'}" style="cursor:pointer;" title="Ordenar por Autor">Autor${sortBy === 'author_asc' ? ' ▲' : (sortBy === 'author_desc' ? ' ▼' : '')}</th>
             <th class="sortable-header" data-sort-target="${sortBy === 'genre_asc' ? 'genre_desc' : 'genre_asc'}" style="cursor:pointer;" title="Ordenar por Género">Género${sortBy === 'genre_asc' ? ' ▲' : (sortBy === 'genre_desc' ? ' ▼' : '')}</th>
             <th class="sortable-header" data-sort-target="${sortBy === 'year_desc' ? 'year_asc' : 'year_desc'}" style="cursor:pointer;" title="Ordenar por Ano">Ano${sortBy === 'year_desc' ? ' ▼' : (sortBy === 'year_asc' ? ' ▲' : '')}</th>
             <th class="sortable-header" data-sort-target="${sortBy === 'isbn_asc' ? 'isbn_desc' : 'isbn_asc'}" style="cursor:pointer;" title="Ordenar por ISBN">ISBN${sortBy === 'isbn_asc' ? ' ▲' : (sortBy === 'isbn_desc' ? ' ▼' : '')}</th>
-            <th class="sortable-header" data-sort-target="${sortBy === 'status_avail' ? 'status_borrowed' : 'status_avail'}" style="cursor:pointer;" title="Ordenar por Estado">Estado${sortBy === 'status_avail' ? ' ▲' : (sortBy === 'status_borrowed' ? ' ▼' : '')}</th>
+            <th class="sortable-header" data-sort-target="${sortBy === 'status_asc' ? 'status_desc' : 'status_asc'}" style="cursor:pointer;" title="Ordenar por Estado">Estado${sortBy === 'status_asc' ? ' ▲' : (sortBy === 'status_desc' ? ' ▼' : '')}</th>
             <th style="text-align:right;">Acções</th>
           </tr>
         </thead>

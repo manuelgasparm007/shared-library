@@ -112,6 +112,7 @@ export function renderMembers(container) {
                       ${isPending ? `
                         <button class="btn btn-secondary btn-sm btn-approve-member" data-id="${member.id}" style="background:rgba(16, 185, 129, 0.2); color:#10b981; border-color:rgba(16, 185, 129, 0.4);" title="Aprovar Conta de Leitor">✅ Aprovar</button>
                       ` : ''}
+                      <button class="btn btn-secondary btn-sm btn-reset-password-member" data-id="${member.id}" data-name="${member.fullName}" title="Repor Palavra-Passe do Leitor">🔑</button>
                       <button class="btn btn-secondary btn-sm btn-edit-member" data-id="${member.id}" title="Editar Leitor">✏️</button>
                       <button class="btn btn-danger btn-sm btn-delete-member" data-id="${member.id}" title="Eliminar Leitor">🗑️</button>
                     </div>
@@ -140,7 +141,13 @@ export function renderMembers(container) {
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
       searchQuery = e.target.value;
+      const cursorPos = e.target.selectionStart;
       renderMembers(container);
+      const newInp = document.getElementById('member-search-input');
+      if (newInp) {
+        newInp.focus();
+        newInp.setSelectionRange(cursorPos, cursorPos);
+      }
     });
   }
 
@@ -156,6 +163,22 @@ export function renderMembers(container) {
         store.approveMember(id);
         showToast('Conta de leitor aprovada com sucesso!', 'success');
         renderMembers(container);
+      });
+    });
+
+    container.querySelectorAll('.btn-reset-password-member').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.dataset.id;
+        const name = e.currentTarget.dataset.name;
+        const newPass = prompt(`Insira a nova palavra-passe para o leitor "${name}":`, '123456');
+        if (newPass && newPass.trim()) {
+          try {
+            store.updateMemberPassword(id, newPass.trim());
+            showToast(`Palavra-passe de "${name}" alterada com sucesso!`, 'success');
+          } catch (err) {
+            showToast(err.message, 'error');
+          }
+        }
       });
     });
 

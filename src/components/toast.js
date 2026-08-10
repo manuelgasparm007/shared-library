@@ -1,4 +1,12 @@
+import { store } from '../data/store.js';
+
 export function showToast(message, type = 'success') {
+  try {
+    store.addToastLog(message, type);
+  } catch (err) {
+    console.warn('Toast log error:', err);
+  }
+
   let container = document.getElementById('toast-container');
   if (!container) {
     container = document.createElement('div');

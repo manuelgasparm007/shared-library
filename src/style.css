@@ -763,7 +763,7 @@ select option {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  z-index: 100;
+  z-index: 99999;
 }
 
 .toast {

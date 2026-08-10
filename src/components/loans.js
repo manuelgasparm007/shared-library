@@ -3,7 +3,7 @@ import { showToast } from './toast.js';
 
 let filterStatus = 'ACTIVE'; // 'ACTIVE', 'RETURNED', 'OVERDUE', 'ALL'
 
-let loanSortBy = 'id_desc';
+let loanSortBy = 'id_asc';
 
 export function setLoansFilter(status = 'ALL') {
   filterStatus = status;

@@ -1,7 +1,7 @@
 import { store } from './data/store.js';
 import { renderLandingAuth } from './components/auth.js';
 import { renderDashboard } from './components/dashboard.js';
-import { renderCatalog } from './components/catalog.js';
+import { renderCatalog, resetCatalogFilters } from './components/catalog.js';
 import { renderMembers } from './components/members.js';
 import { renderLoans } from './components/loans.js';
 import { renderSettings } from './components/settings.js';
@@ -23,6 +23,9 @@ function initApp() {
     item.addEventListener('click', (e) => {
       e.preventDefault();
       const targetView = e.currentTarget.dataset.view;
+      if (targetView === 'catalog') {
+        resetCatalogFilters();
+      }
       switchView(targetView);
       closeMobileDrawer();
     });
@@ -72,14 +75,16 @@ function checkAuthState() {
     renderLandingAuth(authPortal, (user) => {
       authPortal.innerHTML = '';
       if (appShell) appShell.style.display = 'flex';
+      const targetDefaultView = user.role === 'librarian' ? 'dashboard' : 'catalog';
       updateUserUI(user);
-      renderCurrentView();
+      switchView(targetDefaultView);
     });
   } else {
     authPortal.innerHTML = '';
     if (appShell) appShell.style.display = 'flex';
+    const targetDefaultView = currentUser.role === 'librarian' ? 'dashboard' : 'catalog';
     updateUserUI(currentUser);
-    renderCurrentView();
+    switchView(targetDefaultView);
   }
 }
 
