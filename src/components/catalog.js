@@ -131,16 +131,30 @@ export function renderCatalog(container) {
   // Sort books based on selected criterion
   filteredBooks.sort((a, b) => {
     switch (sortBy) {
+      case 'id_desc':
+        return b.id.localeCompare(a.id, 'en', { numeric: true });
       case 'title_asc':
         return a.title.localeCompare(b.title, 'pt');
       case 'title_desc':
         return b.title.localeCompare(a.title, 'pt');
       case 'author_asc':
         return a.author.localeCompare(b.author, 'pt');
+      case 'author_desc':
+        return b.author.localeCompare(a.author, 'pt');
+      case 'genre_asc':
+        return (a.genre || '').localeCompare(b.genre || '', 'pt');
+      case 'genre_desc':
+        return (b.genre || '').localeCompare(a.genre || '', 'pt');
       case 'year_desc':
         return (b.pubYear || 0) - (a.pubYear || 0);
       case 'year_asc':
         return (a.pubYear || 0) - (b.pubYear || 0);
+      case 'isbn_asc':
+        return (a.isbn || '').localeCompare(b.isbn || '');
+      case 'isbn_desc':
+        return (b.isbn || '').localeCompare(a.isbn || '');
+      case 'status_borrowed':
+        return (b.status === 'Disponível' ? 0 : 1) - (a.status === 'Disponível' ? 0 : 1);
       case 'status_avail':
         return (a.status === 'Disponível' ? 0 : 1) - (b.status === 'Disponível' ? 0 : 1);
       case 'id_asc':
@@ -153,7 +167,7 @@ export function renderCatalog(container) {
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
       <div>
         <h2 style="font-size:1.8rem;">Catálogo - Biblioteca Camomila</h2>
-        <p style="color:var(--text-muted); font-size:0.9rem;">Explore e pesquise livros no acervo da biblioteca (${filteredBooks.length} de ${books.length})</p>
+        <p style="color:var(--text-muted); font-size:0.9rem;">Explore e pesquise livros na coleção da biblioteca (${filteredBooks.length} de ${books.length})</p>
       </div>
 
       <div style="display:flex; gap:0.75rem; align-items:center;">
@@ -164,7 +178,7 @@ export function renderCatalog(container) {
         </div>
 
         ${isLibrarian ? `
-          <button id="btn-refresh-all-books" class="btn btn-secondary btn-sm" title="Recarregar capas, ISBNs e sinopses de todos os livros no acervo via Google Books & Open Library">⚡ Recarregar Todo o Acervo</button>
+          <button id="btn-refresh-all-books" class="btn btn-secondary btn-sm" title="Recarregar capas, ISBNs e sinopses de todos os livros na coleção via Google Books & Open Library">⚡ Recarregar Todos os Livros</button>
           <button id="btn-add-book-modal" class="btn btn-primary">➕ Adicionar Livro</button>
         ` : ''}
       </div>
@@ -270,11 +284,11 @@ export function renderCatalog(container) {
       btnRefreshAll.addEventListener('click', async () => {
         const booksList = store.getBooks();
         if (booksList.length === 0) {
-          showToast('Não existem livros no acervo para atualizar.', 'info');
+          showToast('Não existem livros na coleção para atualizar.', 'info');
           return;
         }
 
-        if (!confirm(`Deseja pesquisar e atualizar capas, ISBNs e sinopses de todos os ${booksList.length} livros do acervo nas bases globais?`)) {
+        if (!confirm(`Deseja pesquisar e atualizar capas, ISBNs e sinopses de todos os ${booksList.length} livros da coleção nas bases globais?`)) {
           return;
         }
 
@@ -393,13 +407,13 @@ function renderTable(books, isLibrarian) {
       <table class="custom-table">
         <thead>
           <tr>
-            <th class="sortable-header" data-sort-target="id_asc" style="cursor:pointer;" title="Ordenar por ID">ID${getSortIcon('id_asc')}</th>
-            <th class="sortable-header" data-sort-target="${sortBy === 'title_asc' ? 'title_desc' : 'title_asc'}" style="cursor:pointer;" title="Ordenar por Título">Título${getSortIcon('title_asc') || getSortIcon('title_desc')}</th>
-            <th class="sortable-header" data-sort-target="author_asc" style="cursor:pointer;" title="Ordenar por Autor">Autor${getSortIcon('author_asc')}</th>
-            <th>Género</th>
-            <th class="sortable-header" data-sort-target="${sortBy === 'year_desc' ? 'year_asc' : 'year_desc'}" style="cursor:pointer;" title="Ordenar por Ano">Ano${getSortIcon('year_desc') || getSortIcon('year_asc')}</th>
-            <th>ISBN</th>
-            <th class="sortable-header" data-sort-target="status_avail" style="cursor:pointer;" title="Ordenar por Disponibilidade">Estado${getSortIcon('status_avail')}</th>
+            <th class="sortable-header" data-sort-target="${sortBy === 'id_asc' ? 'id_desc' : 'id_asc'}" style="cursor:pointer;" title="Ordenar por ID">ID${sortBy === 'id_asc' ? ' ▲' : (sortBy === 'id_desc' ? ' ▼' : '')}</th>
+            <th class="sortable-header" data-sort-target="${sortBy === 'title_asc' ? 'title_desc' : 'title_asc'}" style="cursor:pointer;" title="Ordenar por Título">Título${sortBy === 'title_asc' ? ' ▲' : (sortBy === 'title_desc' ? ' ▼' : '')}</th>
+            <th class="sortable-header" data-sort-target="${sortBy === 'author_asc' ? 'author_desc' : 'author_desc'}" style="cursor:pointer;" title="Ordenar por Autor">Autor${sortBy === 'author_asc' ? ' ▲' : (sortBy === 'author_desc' ? ' ▼' : '')}</th>
+            <th class="sortable-header" data-sort-target="${sortBy === 'genre_asc' ? 'genre_desc' : 'genre_asc'}" style="cursor:pointer;" title="Ordenar por Género">Género${sortBy === 'genre_asc' ? ' ▲' : (sortBy === 'genre_desc' ? ' ▼' : '')}</th>
+            <th class="sortable-header" data-sort-target="${sortBy === 'year_desc' ? 'year_asc' : 'year_desc'}" style="cursor:pointer;" title="Ordenar por Ano">Ano${sortBy === 'year_desc' ? ' ▼' : (sortBy === 'year_asc' ? ' ▲' : '')}</th>
+            <th class="sortable-header" data-sort-target="${sortBy === 'isbn_asc' ? 'isbn_desc' : 'isbn_asc'}" style="cursor:pointer;" title="Ordenar por ISBN">ISBN${sortBy === 'isbn_asc' ? ' ▲' : (sortBy === 'isbn_desc' ? ' ▼' : '')}</th>
+            <th class="sortable-header" data-sort-target="${sortBy === 'status_avail' ? 'status_borrowed' : 'status_avail'}" style="cursor:pointer;" title="Ordenar por Estado">Estado${sortBy === 'status_avail' ? ' ▲' : (sortBy === 'status_borrowed' ? ' ▼' : '')}</th>
             <th style="text-align:right;">Acções</th>
           </tr>
         </thead>
@@ -480,12 +494,21 @@ function openBookModal(book, onSave) {
           </div>
         </div>
 
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+        <div style="display:grid; grid-template-columns: 2fr 1fr; gap:1rem;">
           <div class="form-group">
-            <label>Género Principal</label>
-            <select id="book-genre">
-              ${genres.map(g => `<option value="${g}" ${book && book.genre === g ? 'selected' : ''}>${g}</option>`).join('')}
-            </select>
+            <label>Géneros Literários (Seleção Múltipla)</label>
+            <div id="genre-chips-container" style="display:flex; flex-wrap:wrap; gap:0.4rem; padding:0.65rem; background:var(--bg-glass); border:1px solid var(--border-glass); border-radius:var(--radius-md); max-height:130px; overflow-y:auto;">
+              ${genres.map(g => {
+                const currentGenres = book && book.genre ? book.genre.split(',').map(x => x.trim()) : [];
+                const isChecked = currentGenres.includes(g);
+                return `
+                  <label class="genre-chip-label" style="display:inline-flex; align-items:center; gap:0.3rem; padding:0.25rem 0.65rem; border-radius:var(--radius-full); font-size:0.8rem; cursor:pointer; user-select:none; border:1px solid ${isChecked ? 'var(--accent-primary)' : 'var(--border-glass)'}; background:${isChecked ? 'var(--accent-primary)' : 'var(--bg-card)'}; color:${isChecked ? '#ffffff' : 'var(--text-main)'}; transition:all var(--transition-fast);">
+                    <input type="checkbox" class="book-genre-checkbox" value="${g}" ${isChecked ? 'checked' : ''} style="display:none;">
+                    <span>${g}</span>
+                  </label>
+                `;
+              }).join('')}
+            </div>
           </div>
 
           <div class="form-group">
@@ -521,7 +544,7 @@ function openBookModal(book, onSave) {
 
       <div class="modal-footer">
         <button id="btn-cancel-book" class="btn btn-secondary">Cancelar</button>
-        <button id="btn-save-book" class="btn btn-primary">${isEdit ? 'Guardar Alterações' : 'Adicionar ao Acervo'}</button>
+        <button id="btn-save-book" class="btn btn-primary">${isEdit ? 'Guardar Alterações' : 'Adicionar à Coleção'}</button>
       </div>
     </dialog>
   `;
@@ -575,6 +598,22 @@ function openBookModal(book, onSave) {
     });
   }
 
+  // Genre Chips Toggle Handler
+  document.querySelectorAll('.genre-chip-label').forEach(label => {
+    const checkbox = label.querySelector('.book-genre-checkbox');
+    checkbox.addEventListener('change', () => {
+      if (checkbox.checked) {
+        label.style.background = 'var(--accent-primary)';
+        label.style.color = '#ffffff';
+        label.style.borderColor = 'var(--accent-primary)';
+      } else {
+        label.style.background = 'var(--bg-card)';
+        label.style.color = 'var(--text-main)';
+        label.style.borderColor = 'var(--border-glass)';
+      }
+    });
+  });
+
   document.getElementById('btn-save-book').addEventListener('click', () => {
     const title = document.getElementById('book-title').value.trim();
     const author = document.getElementById('book-author').value.trim();
@@ -584,11 +623,14 @@ function openBookModal(book, onSave) {
       return;
     }
 
+    const selectedGenres = Array.from(document.querySelectorAll('.book-genre-checkbox:checked')).map(cb => cb.value);
+    const genreStr = selectedGenres.length > 0 ? selectedGenres.join(', ') : 'Geral';
+
     const bookData = {
       title,
       author,
       pubYear: document.getElementById('book-pub-year').value,
-      genre: document.getElementById('book-genre').value,
+      genre: genreStr,
       status: document.getElementById('book-status').value,
       isbn: document.getElementById('book-isbn').value,
       shelfLocation: document.getElementById('book-shelf').value,
@@ -601,7 +643,7 @@ function openBookModal(book, onSave) {
       showToast('Livro actualizado com sucesso!', 'success');
     } else {
       store.addBook(bookData);
-      showToast('Livro adicionado ao acervo!', 'success');
+      showToast('Livro adicionado à coleção!', 'success');
     }
 
     closeModal();
@@ -631,7 +673,7 @@ function openBookDetailModal(book) {
 
             <div style="margin-top:0.75rem; display:flex; flex-direction:column; gap:0.25rem; font-size:0.85rem; color:var(--text-muted);">
               <div><strong>ID:</strong> ${book.id}</div>
-              <div><strong>Género:</strong> ${book.genre || 'Geral'}</div>
+              <div><strong>Géneros:</strong> ${book.genre ? book.genre.split(',').map(g => `<span class="genre-tag" style="margin-right:0.25rem;">${g.trim()}</span>`).join(' ') : '<span class="genre-tag">Geral</span>'}</div>
               <div><strong>Ano de Publicação:</strong> ${book.pubYear || 'N/A'}</div>
               <div><strong>Localização:</strong> ${book.shelfLocation || 'Prateleira A1'}</div>
               ${book.isbn ? `<div><strong>ISBN:</strong> ${book.isbn}</div>` : '<div><strong>ISBN:</strong> Não especificado</div>'}

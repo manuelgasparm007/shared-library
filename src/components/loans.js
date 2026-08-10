@@ -3,6 +3,8 @@ import { showToast } from './toast.js';
 
 let filterStatus = 'ACTIVE'; // 'ACTIVE', 'RETURNED', 'OVERDUE', 'ALL'
 
+let loanSortBy = 'id_desc';
+
 export function setLoansFilter(status = 'ALL') {
   filterStatus = status;
 }
@@ -25,6 +27,45 @@ export function renderLoans(container) {
     if (filterStatus === 'RETURNED') return loan.status === 'Devolvido';
     if (filterStatus === 'OVERDUE') return loan.isOverdue && loan.status === 'Emprestado';
     return true;
+  });
+
+  filteredLoans.sort((a, b) => {
+    const bookA = store.getBookById(a.bookId);
+    const bookB = store.getBookById(b.bookId);
+    const titleA = bookA ? bookA.title : a.bookId;
+    const titleB = bookB ? bookB.title : b.bookId;
+
+    switch (loanSortBy) {
+      case 'id_asc':
+        return a.id.localeCompare(b.id, 'en', { numeric: true });
+      case 'book_asc':
+        return titleA.localeCompare(titleB, 'pt');
+      case 'book_desc':
+        return titleB.localeCompare(titleA, 'pt');
+      case 'member_asc':
+        return (a.memberName || '').localeCompare(b.memberName || '', 'pt');
+      case 'member_desc':
+        return (b.memberName || '').localeCompare(a.memberName || '', 'pt');
+      case 'checkout_desc':
+        return (b.checkoutDate || '').localeCompare(a.checkoutDate || '');
+      case 'checkout_asc':
+        return (a.checkoutDate || '').localeCompare(b.checkoutDate || '');
+      case 'due_asc':
+        return (a.dueDate || '').localeCompare(b.dueDate || '');
+      case 'due_desc':
+        return (b.dueDate || '').localeCompare(a.dueDate || '');
+      case 'return_desc':
+        return (b.returnDate || '').localeCompare(a.returnDate || '');
+      case 'return_asc':
+        return (a.returnDate || '').localeCompare(b.returnDate || '');
+      case 'status_asc':
+        return (a.status || '').localeCompare(b.status || '');
+      case 'status_desc':
+        return (b.status || '').localeCompare(a.status || '');
+      case 'id_desc':
+      default:
+        return b.id.localeCompare(a.id, 'en', { numeric: true });
+    }
   });
 
   const loansHtml = `
@@ -50,13 +91,13 @@ export function renderLoans(container) {
       <table class="custom-table">
         <thead>
           <tr>
-            <th>ID Transação</th>
-            <th>Livro</th>
-            <th>Requisitante</th>
-            <th>Data Empréstimo</th>
-            <th>Data Limite</th>
-            <th>Data Devolução</th>
-            <th>Estado</th>
+            <th class="sortable-header" data-sort-target="${loanSortBy === 'id_desc' ? 'id_asc' : 'id_desc'}" style="cursor:pointer;" title="Ordenar por ID">ID Transação${loanSortBy === 'id_desc' ? ' ▼' : (loanSortBy === 'id_asc' ? ' ▲' : '')}</th>
+            <th class="sortable-header" data-sort-target="${loanSortBy === 'book_asc' ? 'book_desc' : 'book_asc'}" style="cursor:pointer;" title="Ordenar por Livro">Livro${loanSortBy === 'book_asc' ? ' ▲' : (loanSortBy === 'book_desc' ? ' ▼' : '')}</th>
+            <th class="sortable-header" data-sort-target="${loanSortBy === 'member_asc' ? 'member_desc' : 'member_asc'}" style="cursor:pointer;" title="Ordenar por Requisitante">Requisitante${loanSortBy === 'member_asc' ? ' ▲' : (loanSortBy === 'member_desc' ? ' ▼' : '')}</th>
+            <th class="sortable-header" data-sort-target="${loanSortBy === 'checkout_desc' ? 'checkout_asc' : 'checkout_desc'}" style="cursor:pointer;" title="Ordenar por Data Empréstimo">Data Empréstimo${loanSortBy === 'checkout_desc' ? ' ▼' : (loanSortBy === 'checkout_asc' ? ' ▲' : '')}</th>
+            <th class="sortable-header" data-sort-target="${loanSortBy === 'due_asc' ? 'due_desc' : 'due_asc'}" style="cursor:pointer;" title="Ordenar por Data Limite">Data Limite${loanSortBy === 'due_asc' ? ' ▲' : (loanSortBy === 'due_desc' ? ' ▼' : '')}</th>
+            <th class="sortable-header" data-sort-target="${loanSortBy === 'return_desc' ? 'return_asc' : 'return_desc'}" style="cursor:pointer;" title="Ordenar por Data Devolução">Data Devolução${loanSortBy === 'return_desc' ? ' ▼' : (loanSortBy === 'return_asc' ? ' ▲' : '')}</th>
+            <th class="sortable-header" data-sort-target="${loanSortBy === 'status_asc' ? 'status_desc' : 'status_asc'}" style="cursor:pointer;" title="Ordenar por Estado">Estado${loanSortBy === 'status_asc' ? ' ▲' : (loanSortBy === 'status_desc' ? ' ▼' : '')}</th>
             ${isLibrarian ? `<th style="text-align:right;">Acções</th>` : ''}
           </tr>
         </thead>
@@ -104,6 +145,13 @@ export function renderLoans(container) {
 
   container.innerHTML = loansHtml;
 
+  container.querySelectorAll('.sortable-header').forEach(header => {
+    header.addEventListener('click', (e) => {
+      loanSortBy = e.currentTarget.dataset.sortTarget;
+      renderLoans(container);
+    });
+  });
+
   // Filter Bindings
   container.querySelectorAll('[data-filter]').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -121,7 +169,7 @@ export function renderLoans(container) {
     container.querySelectorAll('.btn-return-loan').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const id = e.currentTarget.dataset.id;
-        if (confirm('Confirmar a devolução deste livro ao acervo?')) {
+        if (confirm('Confirmar a devolução deste livro à biblioteca?')) {
           store.returnBook(id);
           showToast('Livro devolvido e estado actualizado para Disponível', 'success');
           renderLoans(container);

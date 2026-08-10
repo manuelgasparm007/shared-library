@@ -7,7 +7,7 @@ import { renderLoans } from './components/loans.js';
 import { renderSettings } from './components/settings.js';
 import { showToast } from './components/toast.js';
 
-let currentView = 'catalog';
+let currentView = 'dashboard';
 
 document.addEventListener('DOMContentLoaded', () => {
   initApp();
@@ -47,21 +47,6 @@ function initApp() {
     store.logout();
     checkAuthState();
   });
-
-  // Manual Refresh Handler
-  const btnRefresh = document.getElementById('btn-manual-refresh');
-  if (btnRefresh) {
-    btnRefresh.addEventListener('click', async () => {
-      showToast('A atualizar dados da biblioteca...', 'info');
-      try {
-        await store.fetchFromCloud();
-      } catch (err) {
-        console.warn('Cloud fetch on refresh:', err);
-      }
-      renderCurrentView();
-      showToast('Dados da biblioteca atualizados!', 'success');
-    });
-  }
 
   document.getElementById('user-profile-btn').addEventListener('click', () => {
     store.logout();
@@ -128,9 +113,6 @@ function closeMobileDrawer() {
 }
 
 function updateUserUI(user) {
-  const badgeLabel = document.getElementById('role-badge-label');
-  const badgeIcon = document.getElementById('role-badge-icon');
-  const roleBadge = document.getElementById('user-role-badge');
   const nameDisplay = document.getElementById('user-name-display');
   const avatar = document.getElementById('user-avatar');
 
@@ -140,16 +122,6 @@ function updateUserUI(user) {
   avatar.textContent = user.name.charAt(0).toUpperCase();
 
   const isLibrarian = user.role === 'librarian';
-
-  if (isLibrarian) {
-    badgeLabel.textContent = 'Bibliotecário';
-    badgeIcon.textContent = '👑';
-    roleBadge.className = 'role-badge';
-  } else {
-    badgeLabel.textContent = 'Leitor';
-    badgeIcon.textContent = '👤';
-    roleBadge.className = 'role-badge patron';
-  }
 
   // Filter navigation bar items based on user role
   const navItems = document.querySelectorAll('.nav-item');

@@ -2,6 +2,7 @@ import { store } from '../data/store.js';
 import { showToast } from './toast.js';
 
 let searchQuery = '';
+let memberSortBy = 'id_asc';
 
 export function renderMembers(container) {
   const currentUser = store.getCurrentUser();
@@ -14,7 +15,37 @@ export function renderMembers(container) {
       m.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       m.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (m.phone && m.phone.toLowerCase().includes(searchQuery.toLowerCase()));
-  }).sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: 'base' }));
+  });
+
+  filteredMembers.sort((a, b) => {
+    switch (memberSortBy) {
+      case 'id_desc':
+        return b.id.localeCompare(a.id, 'en', { numeric: true });
+      case 'name_asc':
+        return a.fullName.localeCompare(b.fullName, 'pt');
+      case 'name_desc':
+        return b.fullName.localeCompare(a.fullName, 'pt');
+      case 'email_asc':
+        return a.email.localeCompare(b.email, 'en');
+      case 'email_desc':
+        return b.email.localeCompare(a.email, 'en');
+      case 'phone_asc':
+        return (a.phone || '').localeCompare(b.phone || '');
+      case 'phone_desc':
+        return (b.phone || '').localeCompare(a.phone || '');
+      case 'date_desc':
+        return (b.joinedDate || '').localeCompare(a.joinedDate || '');
+      case 'date_asc':
+        return (a.joinedDate || '').localeCompare(b.joinedDate || '');
+      case 'status_asc':
+        return (a.status || '').localeCompare(b.status || '');
+      case 'status_desc':
+        return (b.status || '').localeCompare(a.status || '');
+      case 'id_asc':
+      default:
+        return a.id.localeCompare(b.id, 'en', { numeric: true });
+    }
+  });
 
   const membersHtml = `
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
@@ -38,12 +69,12 @@ export function renderMembers(container) {
       <table class="custom-table">
         <thead>
           <tr>
-            <th>ID Membro</th>
-            <th>Nome Completo</th>
-            <th>Email</th>
-            <th>Telefone</th>
-            <th>Data de Inscrição</th>
-            <th>Recomendações / Empréstimos</th>
+            <th class="sortable-header" data-sort-target="${memberSortBy === 'id_asc' ? 'id_desc' : 'id_asc'}" style="cursor:pointer;" title="Ordenar por ID">ID Membro${memberSortBy === 'id_asc' ? ' ▲' : (memberSortBy === 'id_desc' ? ' ▼' : '')}</th>
+            <th class="sortable-header" data-sort-target="${memberSortBy === 'name_asc' ? 'name_desc' : 'name_asc'}" style="cursor:pointer;" title="Ordenar por Nome">Nome Completo${memberSortBy === 'name_asc' ? ' ▲' : (memberSortBy === 'name_desc' ? ' ▼' : '')}</th>
+            <th class="sortable-header" data-sort-target="${memberSortBy === 'email_asc' ? 'email_desc' : 'email_asc'}" style="cursor:pointer;" title="Ordenar por Email">Email${memberSortBy === 'email_asc' ? ' ▲' : (memberSortBy === 'email_desc' ? ' ▼' : '')}</th>
+            <th class="sortable-header" data-sort-target="${memberSortBy === 'phone_asc' ? 'phone_desc' : 'phone_asc'}" style="cursor:pointer;" title="Ordenar por Telefone">Telefone${memberSortBy === 'phone_asc' ? ' ▲' : (memberSortBy === 'phone_desc' ? ' ▼' : '')}</th>
+            <th class="sortable-header" data-sort-target="${memberSortBy === 'date_desc' ? 'date_asc' : 'date_desc'}" style="cursor:pointer;" title="Ordenar por Data">Data de Inscrição${memberSortBy === 'date_desc' ? ' ▼' : (memberSortBy === 'date_asc' ? ' ▲' : '')}</th>
+            <th class="sortable-header" data-sort-target="${memberSortBy === 'status_asc' ? 'status_desc' : 'status_asc'}" style="cursor:pointer;" title="Ordenar por Estado">Estado / Empréstimos${memberSortBy === 'status_asc' ? ' ▲' : (memberSortBy === 'status_desc' ? ' ▼' : '')}</th>
             ${isLibrarian ? `<th style="text-align:right;">Acções</th>` : ''}
           </tr>
         </thead>
@@ -98,11 +129,20 @@ export function renderMembers(container) {
 
   container.innerHTML = membersHtml;
 
-  const searchInput = document.getElementById('member-search-input');
-  searchInput.addEventListener('input', (e) => {
-    searchQuery = e.target.value;
-    renderMembers(container);
+  container.querySelectorAll('.sortable-header').forEach(header => {
+    header.addEventListener('click', (e) => {
+      memberSortBy = e.currentTarget.dataset.sortTarget;
+      renderMembers(container);
+    });
   });
+
+  const searchInput = document.getElementById('member-search-input');
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      renderMembers(container);
+    });
+  }
 
   if (isLibrarian) {
     const addBtn = document.getElementById('btn-add-member-modal');

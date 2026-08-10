@@ -14,7 +14,9 @@ export function renderDashboard(container) {
   const borrowedBooks = books.filter(b => b.status === 'Emprestado').length;
   const overdueLoans = loans.filter(l => l.isOverdue).length;
 
-  const recentLoans = [...loans].reverse().slice(0, 5);
+  const recentLoans = [...loans]
+    .sort((a, b) => b.id.localeCompare(a.id, 'en', { numeric: true }))
+    .slice(0, 5);
 
   // Genre distribution calculation
   const genreCounts = {};
@@ -27,7 +29,7 @@ export function renderDashboard(container) {
     <div class="dashboard-header" style="display:flex; justify-content:space-between; align-items:center;">
       <div>
         <h2 style="font-size:1.8rem;">Painel de Controlo - Biblioteca Camomila</h2>
-        <p style="color:var(--text-muted); font-size:0.9rem;">Visão geral do acervo, requisições activas e estatísticas</p>
+        <p style="color:var(--text-muted); font-size:0.9rem;">Visão geral da coleção, requisições ativas e estatísticas</p>
       </div>
       ${isLibrarian ? `
         <div style="display:flex; gap:0.75rem;">
@@ -42,7 +44,7 @@ export function renderDashboard(container) {
       <div class="metric-card kpi-card-nav" data-nav-target="catalog" data-filter-type="total" style="cursor:pointer;" title="Ver Todos os Livros no Catálogo">
         <div class="metric-icon-box indigo">📚</div>
         <div class="metric-info">
-          <h4>Total no Acervo</h4>
+          <h4>Total da Coleção</h4>
           <div class="value">${totalBooks}</div>
         </div>
       </div>
@@ -123,7 +125,9 @@ export function renderDashboard(container) {
       <div style="background:var(--bg-card); border:1px solid var(--border-glass); border-radius:var(--radius-lg); padding:1.5rem; display:flex; flex-direction:column; gap:1rem;">
         <h3 style="font-size:1.1rem;">📊 Distribuição por Género</h3>
         <div style="display:flex; flex-direction:column; gap:0.85rem;">
-          ${Object.entries(genreCounts).map(([genre, count]) => {
+          ${Object.entries(genreCounts)
+            .sort(([genreA], [genreB]) => genreA.localeCompare(genreB, 'pt'))
+            .map(([genre, count]) => {
             const percentage = Math.round((count / totalBooks) * 100);
             return `
               <div class="genre-item-nav" data-genre="${genre}" style="cursor:pointer;" title="Filtrar Catálogo por ${genre}">

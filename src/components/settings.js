@@ -10,7 +10,7 @@ export function renderSettings(container) {
 
   const settingsHtml = `
     <div>
-      <h2 style="font-size:1.8rem;">Definições & Aparência</h2>
+      <h2 style="font-size:1.8rem;">Definições</h2>
       <p style="color:var(--text-muted); font-size:0.9rem;">${isLibrarian ? 'Gestão da base de dados, aparências visuais, exportação e sincronização cloud' : 'Personalização de temas visuais e estilo da aplicação'}</p>
     </div>
 
@@ -154,7 +154,7 @@ export function renderSettings(container) {
 
     if (btnResetSeed) {
       btnResetSeed.addEventListener('click', () => {
-        if (confirm('Tem a certeza que deseja repor o acervo inicial do Excel? Todas as alterações manuais serão substituídas.')) {
+        if (confirm('Tem a certeza que deseja repor a coleção inicial do Excel? Todas as alterações manuais serão substituídas.')) {
           store.resetToSeedData();
           showToast('Dados restaurados para a versão inicial do Excel!', 'success');
           setTimeout(() => window.location.reload(), 1000);
