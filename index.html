@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestão de Biblioteca Partilhada</title>
+  <meta name="description" content="Aplicação de gestão de biblioteca com catálogo, empréstimos, leitores e estatísticas em tempo real.">
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">📚</div>
+        <div class="sidebar-logo-text">Biblioteca</div>
+      </div>
+
+      <nav class="nav-group">
+        <a class="nav-item active" data-view="dashboard">
+          <span>📊</span> Painel Principal
+        </a>
+        <a class="nav-item" data-view="catalog">
+          <span>📖</span> Catálogo de Livros
+        </a>
+        <a class="nav-item" data-view="members">
+          <span>👥</span> Directório Leitores
+        </a>
+        <a class="nav-item" data-view="loans">
+          <span>🔄</span> Empréstimos
+        </a>
+        <a class="nav-item" data-view="settings">
+          <span>⚙️</span> Definições & Backup
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div style="font-size:0.75rem; color:var(--text-dim); text-align:center;">
+          Gestão de Biblioteca v1.0<br>
+          Dados do Excel Carregados
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+      <!-- Top Navbar Header -->
+      <header class="top-header">
+        <div class="header-search">
+          <span class="header-search-icon">🔍</span>
+          <input type="text" id="global-search-input" placeholder="Pesquisa rápida no acervo...">
+        </div>
+
+        <div class="header-actions">
+          <button id="btn-theme-toggle" class="btn btn-secondary btn-sm" title="Alternar Tema Claro/Escuro">🌙 Tema</button>
+          
+          <div id="user-role-badge" class="role-badge">
+            <span id="role-badge-icon">👑</span>
+            <span id="role-badge-label">Bibliotecário</span>
+          </div>
+
+          <div id="user-profile-btn" class="user-profile" title="Sessão Utilizador">
+            <div id="user-avatar" class="user-avatar">B</div>
+            <div style="display:flex; flex-direction:column;">
+              <span id="user-name-display" style="font-size:0.85rem; font-weight:700;">Bibliotecário</span>
+              <span id="btn-logout" style="font-size:0.72rem; color:var(--accent-primary); cursor:pointer;">Terminar Sessão</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Dynamic View Container -->
+      <main id="content-viewport" class="content-viewport">
+        <!-- Rendered view components go here -->
+      </main>
+    </div>
+  </div>
+
+  <!-- Portal Containers -->
+  <div id="auth-portal"></div>
+  <div id="toast-container"></div>
+
+  <script type="module" src="/src/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,260 @@
+{
+  "_lista_estados": [
+    {
+      "Estados": "Disponível"
+    },
+    {
+      "Estados": "Emprestado"
+    },
+    {
+      "Estados": "Reservado"
+    },
+    {
+      "Estados": "Atrasado"
+    },
+    {
+      "Estados": "Perdido"
+    },
+    {
+      "Estados": "Danificado"
+    }
+  ],
+  "_lista_generos": [
+    {
+      "Géneros": "Biografia"
+    },
+    {
+      "Géneros": "Desenvolvimento Pessoal"
+    },
+    {
+      "Géneros": "Desporto / Psicologia"
+    },
+    {
+      "Géneros": "Ficção"
+    },
+    {
+      "Géneros": "Gestão / Liderança"
+    },
+    {
+      "Géneros": "Neurociência"
+    },
+    {
+      "Géneros": "Parentalidade"
+    },
+    {
+      "Géneros": "Psicanálise"
+    },
+    {
+      "Géneros": "Psicologia"
+    },
+    {
+      "Géneros": "Psicologia / Psicodinâmica"
+    },
+    {
+      "Géneros": "Psicologia / Saúde"
+    },
+    {
+      "Géneros": "Psicologia / Sociologia"
+    }
+  ],
+  "Biblioteca": [
+    {
+      "ID do Livro": "B001",
+      "Título": "Freud Para Principiantes",
+      "Autor": "Richard Appignanesi e Oscar Zarate",
+      "Género": "Psicanálise, Parentalidade, Neurociência",
+      "Ano de Publicação": 2007,
+      "Estado": "Disponível"
+    },
+    {
+      "ID do Livro": "B002",
+      "Título": "Psychological Testing",
+      "Autor": "Robert M. Kaplan e Dennis P. Saccuzzo",
+      "Género": "Psicologia",
+      "Ano de Publicação": 2017,
+      "Estado": "Disponível"
+    },
+    {
+      "ID do Livro": "B003",
+      "Título": "Vou Ser Pai",
+      "Autor": "Mário Cordeiro",
+      "Género": "Parentalidade",
+      "Ano de Publicação": 2010,
+      "Estado": "Disponível"
+    },
+    {
+      "ID do Livro": "B004",
+      "Título": "Mente de Campeão",
+      "Autor": "François Ducasse",
+      "Género": "Desporto / Psicologia",
+      "Ano de Publicação": 2015,
+      "Estado": "Disponível"
+    },
+    {
+      "ID do Livro": "B005",
+      "Título": "A Psicologia da Criança",
+      "Autor": "Jean Piaget e Bärbel Inhelder",
+      "Género": "Psicologia",
+      "Ano de Publicação": 1966,
+      "Estado": "Disponível"
+    },
+    {
+      "ID do Livro": "B006",
+      "Título": "12 Regras para a Vida",
+      "Autor": "Jordan B. Peterson",
+      "Género": "Desenvolvimento Pessoal",
+      "Ano de Publicação": 2018,
+      "Estado": "Disponível"
+    },
+    {
+      "ID do Livro": "B007",
+      "Título": "Learning Cognitive-Behavior Therapy",
+      "Autor": "Jesse H. Wright, Monica R. Basco e Michael E. Thase",
+      "Género": "Psicologia",
+      "Ano de Publicação": 2005,
+      "Estado": "Disponível"
+    },
+    {
+      "ID do Livro": "B008",
+      "Título": "Change of Heart",
+      "Autor": "Jodi Picoult",
+      "Género": "Ficção",
+      "Ano de Publicação": 2008,
+      "Estado": "Disponível"
+    },
+    {
+      "ID do Livro": "B009",
+      "Título": "A Geração Ansiosa",
+      "Autor": "Jonathan Haidt",
+      "Género": "Psicologia / Sociologia",
+      "Ano de Publicação": 2024,
+      "Estado": "Disponível"
+    },
+    {
+      "ID do Livro": "B010",
+      "Título": "Uma Força para o Bem",
+      "Autor": "Daniel Goleman",
+      "Género": "Desenvolvimento Pessoal",
+      "Ano de Publicação": 2015,
+      "Estado": "Disponível"
+    },
+    {
+      "ID do Livro": "B011",
+      "Título": "Como Ser um Líder",
+      "Autor": "Daniel Goleman",
+      "Género": "Gestão / Liderança",
+      "Ano de Publicação": 2017,
+      "Estado": "Disponível"
+    },
+    {
+      "ID do Livro": "B012",
+      "Título": "Open",
+      "Autor": "Andre Agassi",
+      "Género": "Biografia",
+      "Ano de Publicação": 2009,
+      "Estado": "Disponível"
+    },
+    {
+      "ID do Livro": "B013",
+      "Título": "A Imperfeição é uma Virtude",
+      "Autor": "Brené Brown",
+      "Género": "Desenvolvimento Pessoal",
+      "Ano de Publicação": 2010,
+      "Estado": "Disponível"
+    },
+    {
+      "ID do Livro": "B014",
+      "Título": "Atomic Habits",
+      "Autor": "James Clear",
+      "Género": "Desenvolvimento Pessoal",
+      "Ano de Publicação": 2018,
+      "Estado": "Disponível"
+    },
+    {
+      "ID do Livro": "B015",
+      "Título": "Mulheres Que Correm Com os Lobos",
+      "Autor": "Clarissa Pinkola Estés",
+      "Género": "Psicologia / Psicodinâmica",
+      "Ano de Publicação": 1992,
+      "Estado": "Disponível"
+    },
+    {
+      "ID do Livro": "B016",
+      "Título": "Entrevista Motivacional",
+      "Autor": "William R. Miller e Stephen Rollnick",
+      "Género": "Psicologia / Saúde",
+      "Ano de Publicação": 2012,
+      "Estado": "Disponível"
+    },
+    {
+      "ID do Livro": "B017",
+      "Título": "The Narcissism Epidemic",
+      "Autor": "Jean M. Twenge e W. Keith Campbell",
+      "Género": "Psicologia",
+      "Ano de Publicação": 2009,
+      "Estado": "Disponível"
+    },
+    {
+      "ID do Livro": "B018",
+      "Título": "Cognitive Neuroscience",
+      "Autor": "Michael S. Gazzaniga, Richard B. Ivry e George R. Mangun",
+      "Género": "Neurociência",
+      "Ano de Publicação": 2018,
+      "Estado": "Disponível"
+    },
+    {
+      "ID do Livro": "B019",
+      "Título": "O Livro de Magia das Mães",
+      "Autor": "Constança Cordeiro Ferreira",
+      "Género": "Parentalidade",
+      "Ano de Publicação": 2019,
+      "Estado": "Disponível"
+    },
+    {
+      "ID do Livro": "B020",
+      "Título": "Príncipe Harry - Na Sombra",
+      "Autor": "Prince Harry",
+      "Género": "Biografia",
+      "Ano de Publicação": 2023,
+      "Estado": "Disponível"
+    }
+  ],
+  "Empréstimos": [
+    {
+      "ID Transação": "T001",
+      "ID do Livro": "B002",
+      "Nome do Requisitante": "João Silva",
+      "Data de Empréstimo": "2026-06-01",
+      "Data Limite": "2026-06-15",
+      "Estado": "Emprestado",
+      "Data de Devolução": "-"
+    },
+    {
+      "ID Transação": "T002",
+      "ID do Livro": "B001",
+      "Nome do Requisitante": "Joana Santos",
+      "Data de Empréstimo": "2026-05-10",
+      "Data Limite": "2026-05-24",
+      "Estado": "Devolvido",
+      "Data de Devolução": "2026-05-22"
+    },
+    {
+      "ID Transação": "T003",
+      "ID do Livro": "B004",
+      "Nome do Requisitante": "Alice Ribeiro",
+      "Data de Empréstimo": "2026-06-10",
+      "Data Limite": "2026-06-24",
+      "Estado": "Emprestado",
+      "Data de Devolução": "-"
+    }
+  ],
+  "Membros": [
+    {
+      "ID Membro": "M001",
+      "Nome Completo": "Manuel Gaspar Martins",
+      "Endereço de Email": "manuelgasparm@gmail.com",
+      "Número de Telefone": "+351 916 861 587",
+      "Data de Inscrição": "2026-08-03"
+    }
+  ]
+}
