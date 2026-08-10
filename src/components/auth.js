@@ -7,7 +7,7 @@ export function renderLandingAuth(container, onSuccess) {
       <div class="landing-card">
         <div class="landing-header">
           <div class="landing-logo-icon">
-            <img src="/favicon.png" alt="Biblioteca Camomila Logo" style="width: 34px; height: 34px; object-fit: contain;">
+            <img src="./favicon.png" alt="Biblioteca Camomila Logo" style="width: 34px; height: 34px; object-fit: contain;">
           </div>
           <h2>Biblioteca Camomila</h2>
           <p>Sistema de Gestão da Biblioteca</p>
