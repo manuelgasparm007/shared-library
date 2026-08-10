@@ -1,4 +1,6 @@
 import { store } from '../data/store.js';
+import { setCatalogFilter } from './catalog.js';
+import { setLoansFilter } from './loans.js';
 
 export function renderDashboard(container) {
   const books = store.getBooks();
@@ -37,7 +39,7 @@ export function renderDashboard(container) {
 
     <!-- Metrics KPI Cards -->
     <div class="metrics-grid">
-      <div class="metric-card">
+      <div class="metric-card kpi-card-nav" data-nav-target="catalog" data-filter-type="total" style="cursor:pointer;" title="Ver Todos os Livros no Catálogo">
         <div class="metric-icon-box indigo">📚</div>
         <div class="metric-info">
           <h4>Total no Acervo</h4>
@@ -45,7 +47,7 @@ export function renderDashboard(container) {
         </div>
       </div>
 
-      <div class="metric-card">
+      <div class="metric-card kpi-card-nav" data-nav-target="catalog" data-filter-type="available" style="cursor:pointer;" title="Ver Livros Disponíveis no Catálogo">
         <div class="metric-icon-box emerald">✅</div>
         <div class="metric-info">
           <h4>Disponíveis</h4>
@@ -53,7 +55,7 @@ export function renderDashboard(container) {
         </div>
       </div>
 
-      <div class="metric-card">
+      <div class="metric-card kpi-card-nav" data-nav-target="catalog" data-filter-type="borrowed" style="cursor:pointer;" title="Ver Livros Emprestados no Catálogo">
         <div class="metric-icon-box amber">📖</div>
         <div class="metric-info">
           <h4>Emprestados</h4>
@@ -61,7 +63,7 @@ export function renderDashboard(container) {
         </div>
       </div>
 
-      <div class="metric-card">
+      <div class="metric-card kpi-card-nav" data-nav-target="loans" data-filter-type="overdue" style="cursor:pointer;" title="Ver Empréstimos em Atraso">
         <div class="metric-icon-box rose">⚠️</div>
         <div class="metric-info">
           <h4>Em Atraso</h4>
@@ -69,7 +71,7 @@ export function renderDashboard(container) {
         </div>
       </div>
 
-      <div class="metric-card">
+      <div class="metric-card kpi-card-nav" data-nav-target="members" data-filter-type="members" style="cursor:pointer;" title="Ver Directório de Leitores">
         <div class="metric-icon-box indigo">👥</div>
         <div class="metric-info">
           <h4>Leitores Registados</h4>
@@ -82,8 +84,9 @@ export function renderDashboard(container) {
     <div style="display:grid; grid-template-columns: 2fr 1fr; gap:1.5rem; margin-top:0.5rem;">
       <!-- Recent Loans Stream -->
       <div class="table-container">
-        <div class="table-header">
+        <div class="table-header" style="display:flex; justify-content:space-between; align-items:center;">
           <h3>📌 Empréstimos Recentes</h3>
+          <button id="btn-view-all-loans" class="btn btn-secondary btn-sm" style="font-size:0.75rem;">Ver Todos ➔</button>
         </div>
         <table class="custom-table">
           <thead>
@@ -123,7 +126,7 @@ export function renderDashboard(container) {
           ${Object.entries(genreCounts).map(([genre, count]) => {
             const percentage = Math.round((count / totalBooks) * 100);
             return `
-              <div>
+              <div class="genre-item-nav" data-genre="${genre}" style="cursor:pointer;" title="Filtrar Catálogo por ${genre}">
                 <div style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:500; margin-bottom:0.25rem;">
                   <span>${genre}</span>
                   <span style="color:var(--text-muted);">${count} livros (${percentage}%)</span>
@@ -141,7 +144,51 @@ export function renderDashboard(container) {
 
   container.innerHTML = dashboardHtml;
 
-  // Bind Quick Actions
+  // Bind Metric KPI Cards Navigation
+  container.querySelectorAll('.kpi-card-nav').forEach(card => {
+    card.addEventListener('click', (e) => {
+      const target = e.currentTarget.dataset.navTarget;
+      const filterType = e.currentTarget.dataset.filterType;
+
+      if (target === 'catalog') {
+        if (filterType === 'total') {
+          setCatalogFilter({ genre: 'ALL', status: 'ALL' });
+        } else if (filterType === 'available') {
+          setCatalogFilter({ genre: 'ALL', status: 'Disponível' });
+        } else if (filterType === 'borrowed') {
+          setCatalogFilter({ genre: 'ALL', status: 'Emprestado' });
+        }
+        document.querySelector('[data-view="catalog"]').click();
+      } else if (target === 'loans') {
+        if (filterType === 'overdue') {
+          setLoansFilter('OVERDUE');
+        }
+        document.querySelector('[data-view="loans"]').click();
+      } else if (target === 'members') {
+        document.querySelector('[data-view="members"]').click();
+      }
+    });
+  });
+
+  // Bind Genre Bars Click Handler
+  container.querySelectorAll('.genre-item-nav').forEach(item => {
+    item.addEventListener('click', (e) => {
+      const genre = e.currentTarget.dataset.genre;
+      setCatalogFilter({ genre: genre, status: 'ALL' });
+      document.querySelector('[data-view="catalog"]').click();
+    });
+  });
+
+  // View All Loans Button
+  const btnViewAllLoans = document.getElementById('btn-view-all-loans');
+  if (btnViewAllLoans) {
+    btnViewAllLoans.addEventListener('click', () => {
+      setLoansFilter('ALL');
+      document.querySelector('[data-view="loans"]').click();
+    });
+  }
+
+  // Quick Actions
   const btnQuickAdd = document.getElementById('quick-add-book');
   const btnQuickCheckout = document.getElementById('quick-checkout');
 

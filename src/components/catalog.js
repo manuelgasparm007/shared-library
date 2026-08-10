@@ -7,6 +7,106 @@ let selectedGenre = 'ALL';
 let selectedStatus = 'ALL';
 let sortBy = 'title_asc'; // 'title_asc', 'title_desc', 'author_asc', 'year_desc', 'year_asc', 'status_avail', 'id_asc'
 
+export function setCatalogFilter({ genre, status } = {}) {
+  if (genre !== undefined) selectedGenre = genre;
+  if (status !== undefined) selectedStatus = status;
+}
+
+// Global helper for querying Google Books & Open Library APIs
+async function fetchGlobalBookInfo(query) {
+  let result = {
+    title: '',
+    author: '',
+    pubYear: null,
+    publisher: '',
+    isbn: '',
+    coverUrl: '',
+    synopsis: ''
+  };
+
+  const cleanIsbn = query.replace(/[^0-9X]/gi, '');
+  const isDirectIsbnSearch = (cleanIsbn.length === 10 || cleanIsbn.length === 13);
+
+  // 1. Try Google Books API (High accuracy for ISBN-13 and cover art)
+  try {
+    const gbQuery = isDirectIsbnSearch ? `isbn:${cleanIsbn}` : query;
+    const gbRes = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(gbQuery)}`);
+    if (gbRes.ok) {
+      const gbData = await gbRes.json();
+      if (gbData.items && gbData.items.length > 0) {
+        const info = gbData.items[0].volumeInfo;
+        result.title = info.title || '';
+        result.author = info.authors ? info.authors.join(', ') : '';
+        result.pubYear = info.publishedDate ? parseInt(info.publishedDate.substring(0, 4)) : null;
+        result.publisher = info.publisher || '';
+        result.synopsis = info.description || '';
+
+        // Extract ISBN 13 or ISBN 10
+        if (info.industryIdentifiers && Array.isArray(info.industryIdentifiers)) {
+          const isbn13 = info.industryIdentifiers.find(i => i.type === 'ISBN_13');
+          const isbn10 = info.industryIdentifiers.find(i => i.type === 'ISBN_10');
+          result.isbn = isbn13 ? isbn13.identifier : (isbn10 ? isbn10.identifier : info.industryIdentifiers[0].identifier || '');
+        }
+
+        // Extract Cover URL
+        if (info.imageLinks) {
+          let img = info.imageLinks.thumbnail || info.imageLinks.smallThumbnail || '';
+          if (img.startsWith('http://')) img = img.replace('http://', 'https://');
+          result.coverUrl = img;
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('Google Books API lookup error:', err);
+  }
+
+  // 2. Complement / fallback with Open Library API
+  try {
+    let olUrl = `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}`;
+    if (isDirectIsbnSearch) {
+      olUrl = `https://openlibrary.org/search.json?isbn=${cleanIsbn}`;
+    }
+
+    const olRes = await fetch(olUrl);
+    if (olRes.ok) {
+      const olData = await olRes.json();
+      if (olData && olData.docs && olData.docs.length > 0) {
+        const doc = olData.docs[0];
+        if (!result.title) result.title = doc.title || '';
+        if (!result.author && doc.author_name) result.author = doc.author_name[0];
+        if (!result.pubYear) result.pubYear = doc.first_publish_year || (doc.publish_date ? parseInt(doc.publish_date[0]) : null);
+        if (!result.publisher && doc.publisher) result.publisher = doc.publisher[0];
+        if (!result.synopsis && doc.first_sentence) {
+          result.synopsis = Array.isArray(doc.first_sentence) ? doc.first_sentence[0] : doc.first_sentence;
+        }
+
+        // Extract ISBN if missing
+        if (!result.isbn) {
+          if (isDirectIsbnSearch) {
+            result.isbn = cleanIsbn;
+          } else if (doc.isbn && Array.isArray(doc.isbn)) {
+            const bestIsbn = doc.isbn.find(i => (i.startsWith('978') || i.startsWith('979')) && i.length === 13) || doc.isbn[0];
+            result.isbn = bestIsbn;
+          }
+        }
+
+        // Extract Cover if missing
+        if (!result.coverUrl && doc.cover_i) {
+          result.coverUrl = `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`;
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('Open Library API lookup error:', err);
+  }
+
+  if (isDirectIsbnSearch && !result.isbn) {
+    result.isbn = cleanIsbn;
+  }
+
+  return (result.title || result.author || result.isbn) ? result : null;
+}
+
 export function renderCatalog(container) {
   const currentUser = store.getCurrentUser();
   const isLibrarian = currentUser.role === 'librarian';
@@ -63,7 +163,10 @@ export function renderCatalog(container) {
           <button id="view-table-btn" class="btn btn-sm ${currentViewMode === 'table' ? 'btn-primary' : 'btn-secondary'}" style="border:none;">📋 Tabela</button>
         </div>
 
-        ${isLibrarian ? `<button id="btn-add-book-modal" class="btn btn-primary">➕ Adicionar Livro</button>` : ''}
+        ${isLibrarian ? `
+          <button id="btn-refresh-all-books" class="btn btn-secondary btn-sm" title="Recarregar capas, ISBNs e sinopses de todos os livros no acervo via Google Books & Open Library">⚡ Recarregar Todo o Acervo</button>
+          <button id="btn-add-book-modal" class="btn btn-primary">➕ Adicionar Livro</button>
+        ` : ''}
       </div>
     </div>
 
@@ -94,30 +197,30 @@ export function renderCatalog(container) {
           <option value="author_asc" ${sortBy === 'author_asc' ? 'selected' : ''}>👤 Ordenar: Autor (A - Z)</option>
           <option value="year_desc" ${sortBy === 'year_desc' ? 'selected' : ''}>📅 Ordenar: Ano (Mais Recente)</option>
           <option value="year_asc" ${sortBy === 'year_asc' ? 'selected' : ''}>📅 Ordenar: Ano (Mais Antigo)</option>
-          <option value="status_avail" ${sortBy === 'status_avail' ? 'selected' : ''}>✅ Ordenar: Disponíveis Primeiro</option>
-          <option value="id_asc" ${sortBy === 'id_asc' ? 'selected' : ''}>🏷️ Ordenar: ID de Registo</option>
+          <option value="status_avail" ${sortBy === 'status_avail' ? 'selected' : ''}>🟢 Ordenar: Disponibilidade</option>
+          <option value="id_asc" ${sortBy === 'id_asc' ? 'selected' : ''}>🔢 Ordenar: ID Livro (001...)</option>
         </select>
       </div>
     </div>
 
-    <!-- Main Inventory Viewport -->
-    <div id="catalog-inventory-container">
+    <!-- Active View Container -->
+    <div id="catalog-view-content" style="margin-top:1rem;">
       ${filteredBooks.length === 0 ? `
-        <div style="text-align:center; padding:4rem 2rem; background:var(--bg-card); border-radius:var(--radius-lg); border:1px solid var(--border-glass);">
+        <div style="text-align:center; padding:4rem; color:var(--text-muted); background:var(--bg-card); border-radius:var(--radius-lg); border:1px solid var(--border-glass);">
           <div style="font-size:3rem; margin-bottom:1rem;">🔍</div>
           <h3>Nenhum livro encontrado</h3>
-          <p style="color:var(--text-muted);">Tente ajustar os termos de pesquisa ou filtros</p>
+          <p>Tente ajustar os termos de pesquisa ou remover os filtros aplicados.</p>
         </div>
       ` : (currentViewMode === 'grid' ? renderGrid(filteredBooks, isLibrarian) : renderTable(filteredBooks, isLibrarian))}
     </div>
 
-    <!-- Modal Containers -->
+    <!-- Book Form Portal & Detail Portal -->
     <div id="book-modal-portal"></div>
   `;
 
   container.innerHTML = catalogHtml;
 
-  // Bind Listeners
+  // View Switchers
   document.getElementById('view-grid-btn').addEventListener('click', () => {
     currentViewMode = 'grid';
     renderCatalog(container);
@@ -161,6 +264,55 @@ export function renderCatalog(container) {
     if (addBtn) {
       addBtn.addEventListener('click', () => openBookModal(null, () => renderCatalog(container)));
     }
+
+    const btnRefreshAll = document.getElementById('btn-refresh-all-books');
+    if (btnRefreshAll) {
+      btnRefreshAll.addEventListener('click', async () => {
+        const booksList = store.getBooks();
+        if (booksList.length === 0) {
+          showToast('Não existem livros no acervo para atualizar.', 'info');
+          return;
+        }
+
+        if (!confirm(`Deseja pesquisar e atualizar capas, ISBNs e sinopses de todos os ${booksList.length} livros do acervo nas bases globais?`)) {
+          return;
+        }
+
+        btnRefreshAll.disabled = true;
+        showToast(`⚡ A iniciar atualização automática de ${booksList.length} livros...`, 'info');
+        let updatedCount = 0;
+
+        for (let i = 0; i < booksList.length; i++) {
+          const book = booksList[i];
+          showToast(`⚡ A atualizar (${i + 1}/${booksList.length}): "${book.title}"...`, 'info');
+
+          try {
+            const query = book.isbn || `${book.title} ${book.author}`;
+            const fetchedData = await fetchGlobalBookInfo(query);
+
+            if (fetchedData) {
+              const updatedFields = {};
+              if (fetchedData.coverUrl && (!book.coverUrl || book.coverUrl === '')) updatedFields.coverUrl = fetchedData.coverUrl;
+              if (fetchedData.synopsis && (!book.synopsis || book.synopsis === '')) updatedFields.synopsis = fetchedData.synopsis;
+              if (fetchedData.isbn) updatedFields.isbn = fetchedData.isbn; // Always update/enforce ISBN if found!
+              if (fetchedData.pubYear && (!book.pubYear || book.pubYear === 2024)) updatedFields.pubYear = fetchedData.pubYear;
+
+              if (Object.keys(updatedFields).length > 0) {
+                store.updateBook(book.id, updatedFields);
+                updatedCount++;
+              }
+            }
+          } catch (err) {
+            console.warn(`Error auto updating book ${book.id}:`, err);
+          }
+
+          await new Promise(r => setTimeout(r, 120));
+        }
+
+        showToast(`✨ Processo concluído! ${updatedCount} livro(s) foram atualizados com novas capas e ISBNs!`, 'success');
+        renderCatalog(container);
+      });
+    }
   }
 
   // Bind Actions on Book Cards / Rows
@@ -175,9 +327,10 @@ export function renderCatalog(container) {
   container.querySelectorAll('.btn-delete-book').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const bookId = e.currentTarget.dataset.id;
-      if (confirm('Tem a certeza que deseja eliminar este livro do acervo?')) {
+      const book = store.getBookById(bookId);
+      if (confirm(`Tem a certeza que deseja eliminar o livro "${book.title}"?`)) {
         store.deleteBook(bookId);
-        showToast('Livro eliminado com sucesso', 'success');
+        showToast('Livro eliminado com sucesso', 'info');
         renderCatalog(container);
       }
     });
@@ -194,42 +347,31 @@ export function renderCatalog(container) {
 
 function renderGrid(books, isLibrarian) {
   return `
-    <div class="books-grid">
+    <div class="grid-layout">
       ${books.map(book => {
-        const isAvailable = book.status === 'Disponível';
-        const statusClass = isAvailable ? 'available' : (book.status === 'Emprestado' ? 'borrowed' : 'overdue');
-
+        const statusClass = book.status === 'Disponível' ? 'available' : (book.status === 'Emprestado' ? 'borrowed' : 'overdue');
         return `
           <div class="book-card">
-            <div class="book-cover">
-              ${book.coverUrl ? `<img src="${book.coverUrl}" alt="${book.title}">` : `
-                <div style="font-size:2.5rem; margin-bottom:0.5rem;">📖</div>
-                <div class="book-cover-title">${book.title}</div>
-                <div class="book-cover-author">${book.author}</div>
-              `}
+            <div class="book-cover-container">
+              ${book.coverUrl ? `<img src="${book.coverUrl}" class="book-cover-img" alt="${book.title}">` : `<div style="font-size:2.5rem; opacity:0.6;">📖</div>`}
+              <span class="status-tag ${statusClass}" style="position:absolute; top:0.75rem; right:0.75rem; font-size:0.75rem;">${book.status}</span>
             </div>
-
-            <div class="book-details">
-              <div style="display:flex; justify-content:space-between; align-items:start; gap:0.5rem;">
-                <span class="status-tag ${statusClass}">${book.status}</span>
-                <span style="font-size:0.75rem; color:var(--text-dim); font-weight:700;">ID: ${book.id}</span>
+            
+            <div class="book-details" style="display:flex; flex-direction:column; justify-content:space-between; flex:1;">
+              <div>
+                <div class="book-title" title="${book.title}">${book.title}</div>
+                <div class="book-author">Por ${book.author}</div>
               </div>
-
-              <div class="book-title" style="margin-top:0.4rem;">${book.title}</div>
-              <div class="book-author">${book.author}</div>
-
-              <div class="book-meta">
-                <span>📂 ${book.genre || 'Geral'}</span>
-                <span>📅 ${book.pubYear || 'N/A'}</span>
+              
+              <div style="display:flex; justify-content:flex-end; align-items:center; margin-top:0.75rem; padding-top:0.5rem; border-top:1px solid var(--border-glass);">
+                <div class="action-buttons-group">
+                  <button class="btn btn-secondary btn-sm btn-view-book" data-id="${book.id}" title="Ver Detalhes">👁️</button>
+                  ${isLibrarian ? `
+                    <button class="btn btn-secondary btn-sm btn-edit-book" data-id="${book.id}" title="Editar Livro">✏️</button>
+                    <button class="btn btn-danger btn-sm btn-delete-book" data-id="${book.id}" title="Eliminar Livro">🗑️</button>
+                  ` : ''}
+                </div>
               </div>
-            </div>
-
-            <div style="margin-top:auto; padding-top:0.75rem; border-top:1px solid var(--border-glass); display:flex; gap:0.5rem; justify-content:flex-end;">
-              <button class="btn btn-secondary btn-sm btn-view-book" data-id="${book.id}">👁️ Detalhes</button>
-              ${isLibrarian ? `
-                <button class="btn btn-secondary btn-sm btn-edit-book" data-id="${book.id}">✏️ Editar</button>
-                <button class="btn btn-danger btn-sm btn-delete-book" data-id="${book.id}">🗑️</button>
-              ` : ''}
             </div>
           </div>
         `;
@@ -256,7 +398,7 @@ function renderTable(books, isLibrarian) {
             <th class="sortable-header" data-sort-target="author_asc" style="cursor:pointer;" title="Ordenar por Autor">Autor${getSortIcon('author_asc')}</th>
             <th>Género</th>
             <th class="sortable-header" data-sort-target="${sortBy === 'year_desc' ? 'year_asc' : 'year_desc'}" style="cursor:pointer;" title="Ordenar por Ano">Ano${getSortIcon('year_desc') || getSortIcon('year_asc')}</th>
-            <th>Prateleira</th>
+            <th>ISBN</th>
             <th class="sortable-header" data-sort-target="status_avail" style="cursor:pointer;" title="Ordenar por Disponibilidade">Estado${getSortIcon('status_avail')}</th>
             <th style="text-align:right;">Acções</th>
           </tr>
@@ -271,14 +413,16 @@ function renderTable(books, isLibrarian) {
                 <td>${book.author}</td>
                 <td>${book.genre}</td>
                 <td>${book.pubYear || 'N/A'}</td>
-                <td><span style="color:var(--text-muted); font-size:0.85rem;">📍 ${book.shelfLocation || 'A-1'}</span></td>
+                <td><span style="color:var(--text-muted); font-size:0.85rem;">${book.isbn || '—'}</span></td>
                 <td><span class="status-tag ${statusClass}">${book.status}</span></td>
                 <td style="text-align:right;">
-                  <button class="btn btn-secondary btn-sm btn-view-book" data-id="${book.id}">👁️</button>
-                  ${isLibrarian ? `
-                    <button class="btn btn-secondary btn-sm btn-edit-book" data-id="${book.id}">✏️</button>
-                    <button class="btn btn-danger btn-sm btn-delete-book" data-id="${book.id}">🗑️</button>
-                  ` : ''}
+                  <div class="action-buttons-group">
+                    <button class="btn btn-secondary btn-sm btn-view-book" data-id="${book.id}" title="Ver Detalhes">👁️</button>
+                    ${isLibrarian ? `
+                      <button class="btn btn-secondary btn-sm btn-edit-book" data-id="${book.id}" title="Editar Livro">✏️</button>
+                      <button class="btn btn-danger btn-sm btn-delete-book" data-id="${book.id}" title="Eliminar Livro">🗑️</button>
+                    ` : ''}
+                  </div>
                 </td>
               </tr>
             `;
@@ -304,6 +448,21 @@ function openBookModal(book, onSave) {
       </div>
 
       <form id="form-book" class="modal-body" style="max-height:70vh; overflow-y:auto;">
+        <!-- Auto Lookup Box -->
+        <div style="background:var(--bg-glass); border:1px solid var(--border-glass); border-radius:var(--radius-md); padding:0.85rem; margin-bottom:1rem; display:flex; flex-direction:column; gap:0.4rem;">
+          <label style="font-weight:700; font-size:0.82rem; color:var(--accent-primary); display:flex; align-items:center; gap:0.4rem;">
+            <span>⚡ Preenchimento Automático</span>
+            <span style="font-weight:400; font-size:0.75rem; color:var(--text-muted);">(Pesquisa por ISBN, Título ou Autor)</span>
+          </label>
+          <div style="display:flex; gap:0.5rem;">
+            <div class="form-group" style="flex:1; margin:0;">
+              <input type="text" id="auto-fetch-query" value="${book ? (book.isbn || `${book.title} ${book.author}`) : ''}" placeholder="Insira o ISBN (ex: 9789722030000) ou Título/Autor...">
+            </div>
+            <button type="button" id="btn-auto-fetch" class="btn btn-secondary btn-sm" style="white-space:nowrap;">🔍 Pesquisar Dados</button>
+          </div>
+          <div id="auto-fetch-status" style="font-size:0.75rem; color:var(--text-muted); min-height:1rem;"></div>
+        </div>
+
         <div class="form-group">
           <label>Título do Livro *</label>
           <input type="text" id="book-title" required value="${book ? book.title : ''}">
@@ -373,6 +532,49 @@ function openBookModal(book, onSave) {
   document.getElementById('btn-cancel-book').addEventListener('click', closeModal);
   document.getElementById('backdrop-book-modal').addEventListener('click', closeModal);
 
+  // Auto-Fetch API Handler
+  const btnAutoFetch = document.getElementById('btn-auto-fetch');
+  const autoQuery = document.getElementById('auto-fetch-query');
+  const autoStatus = document.getElementById('auto-fetch-status');
+
+  if (btnAutoFetch) {
+    btnAutoFetch.addEventListener('click', async () => {
+      const query = autoQuery.value.trim();
+      if (!query) {
+        showToast('Por favor insira um ISBN, Título ou Autor para pesquisar', 'error');
+        return;
+      }
+
+      autoStatus.textContent = '⏳ A pesquisar na base de dados global (Google Books & Open Library)...';
+      btnAutoFetch.disabled = true;
+
+      try {
+        const fetchedData = await fetchGlobalBookInfo(query);
+
+        if (fetchedData && (fetchedData.title || fetchedData.author || fetchedData.isbn)) {
+          if (fetchedData.title) document.getElementById('book-title').value = fetchedData.title;
+          if (fetchedData.author) document.getElementById('book-author').value = fetchedData.author;
+          if (fetchedData.pubYear) document.getElementById('book-pub-year').value = fetchedData.pubYear;
+          if (fetchedData.isbn) document.getElementById('book-isbn').value = fetchedData.isbn;
+          if (fetchedData.coverUrl) document.getElementById('book-cover-url').value = fetchedData.coverUrl;
+          if (fetchedData.synopsis) document.getElementById('book-synopsis').value = fetchedData.synopsis;
+
+          autoStatus.innerHTML = `✅ <strong>Sucesso!</strong> Encontrado: <em>"${fetchedData.title}"</em> por ${fetchedData.author || 'Autor desconhecido'} ${fetchedData.isbn ? `(ISBN: ${fetchedData.isbn})` : ''}`;
+          showToast('Dados do livro (incluindo ISBN) preenchidos com sucesso!', 'success');
+        } else {
+          autoStatus.innerHTML = `❌ Nenhuma informação encontrada para "<em>${query}</em>". Tente ajustar o ISBN ou título.`;
+          showToast('Nenhum resultado encontrado nas bases de dados globais.', 'info');
+        }
+      } catch (err) {
+        console.error('Auto fetch error:', err);
+        autoStatus.textContent = '❌ Erro ao ligar ao serviço de pesquisa de livros.';
+        showToast('Erro de ligação ao pesquisar dados do livro.', 'error');
+      } finally {
+        btnAutoFetch.disabled = false;
+      }
+    });
+  }
+
   document.getElementById('btn-save-book').addEventListener('click', () => {
     const title = document.getElementById('book-title').value.trim();
     const author = document.getElementById('book-author').value.trim();
@@ -432,7 +634,7 @@ function openBookDetailModal(book) {
               <div><strong>Género:</strong> ${book.genre || 'Geral'}</div>
               <div><strong>Ano de Publicação:</strong> ${book.pubYear || 'N/A'}</div>
               <div><strong>Localização:</strong> ${book.shelfLocation || 'Prateleira A1'}</div>
-              ${book.isbn ? `<div><strong>ISBN:</strong> ${book.isbn}</div>` : ''}
+              ${book.isbn ? `<div><strong>ISBN:</strong> ${book.isbn}</div>` : '<div><strong>ISBN:</strong> Não especificado</div>'}
             </div>
           </div>
         </div>
@@ -444,7 +646,10 @@ function openBookDetailModal(book) {
           </div>
         ` : ''}
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer" style="display:flex; justify-content:space-between; align-items:center;">
+        ${store.getCurrentUser().role === 'librarian' ? `
+          <button id="btn-refresh-book-info" class="btn btn-secondary btn-sm" title="Pesquisar capa e ISBN mais recentes nas bases de dados globais">⚡ Recarregar Capa & ISBN</button>
+        ` : '<div></div>'}
         <button id="btn-close-detail-footer" class="btn btn-primary">Fechar</button>
       </div>
     </dialog>
@@ -455,4 +660,37 @@ function openBookDetailModal(book) {
   document.getElementById('btn-close-detail').addEventListener('click', closeModal);
   document.getElementById('btn-close-detail-footer').addEventListener('click', closeModal);
   document.getElementById('backdrop-detail-modal').addEventListener('click', closeModal);
+
+  const btnRefreshInfo = document.getElementById('btn-refresh-book-info');
+  if (btnRefreshInfo) {
+    btnRefreshInfo.addEventListener('click', async () => {
+      showToast(`A pesquisar a capa, ISBN e dados mais recentes para "${book.title}"...`, 'info');
+      btnRefreshInfo.disabled = true;
+
+      try {
+        const query = book.isbn || `${book.title} ${book.author}`;
+        const fetchedData = await fetchGlobalBookInfo(query);
+
+        if (fetchedData && (fetchedData.coverUrl || fetchedData.synopsis || fetchedData.isbn)) {
+          const updatedFields = {};
+          if (fetchedData.coverUrl) updatedFields.coverUrl = fetchedData.coverUrl;
+          if (fetchedData.synopsis) updatedFields.synopsis = fetchedData.synopsis;
+          if (fetchedData.isbn) updatedFields.isbn = fetchedData.isbn; // Always update ISBN!
+          if (fetchedData.pubYear) updatedFields.pubYear = fetchedData.pubYear;
+
+          store.updateBook(book.id, updatedFields);
+          const updatedBook = store.getBookById(book.id);
+          showToast('Capa, ISBN e detalhes do livro recarregados com sucesso!', 'success');
+          openBookDetailModal(updatedBook);
+        } else {
+          showToast('Não foram encontradas novas imagens de capa ou dados adicionais.', 'info');
+        }
+      } catch (err) {
+        console.error('Refresh book info error:', err);
+        showToast('Erro ao recarregar dados do livro.', 'error');
+      } finally {
+        if (btnRefreshInfo) btnRefreshInfo.disabled = false;
+      }
+    });
+  }
 }

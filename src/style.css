@@ -473,21 +473,22 @@ table.custom-table tr:hover td {
 .status-tag.overdue { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
 .status-tag.returned { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
 
-/* Books Grid Layout */
-.books-grid {
+/* Books Grid & Gallery Layout */
+.books-grid,
+.grid-layout {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.25rem;
 }
 
 .book-card {
   background: var(--bg-card);
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-lg);
-  padding: 1.25rem;
+  padding: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
   box-shadow: var(--shadow-card);
   transition: all var(--transition-normal);
   position: relative;
@@ -495,34 +496,34 @@ table.custom-table tr:hover td {
 }
 
 .book-card:hover {
-  transform: translateY(-6px);
+  transform: translateY(-4px);
   border-color: var(--accent-primary);
-  box-shadow: 0 14px 36px -10px rgba(0, 0, 0, 0.6), var(--shadow-glow);
+  box-shadow: 0 10px 25px -8px rgba(0, 0, 0, 0.5), var(--shadow-glow);
 }
 
-.book-cover {
+.book-cover,
+.book-cover-container {
   width: 100%;
-  height: 180px;
+  height: 160px;
   border-radius: var(--radius-md);
-  background: linear-gradient(135deg, #312e81, #4338ca);
+  background: linear-gradient(135deg, rgba(49, 46, 129, 0.4), rgba(67, 56, 202, 0.4));
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   color: #fff;
-  padding: 1rem;
+  padding: 0.5rem;
   text-align: center;
   position: relative;
   overflow: hidden;
 }
 
-.book-cover img {
+.book-cover img,
+.book-cover-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  position: absolute;
-  top: 0;
-  left: 0;
+  border-radius: var(--radius-md);
 }
 
 .book-cover-title {
@@ -570,15 +571,17 @@ table.custom-table tr:hover td {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 0.65rem 1.25rem;
+  gap: 0.4rem;
+  padding: 0.6rem 1.1rem;
   border-radius: var(--radius-md);
-  font-size: 0.9rem;
   font-weight: 600;
+  font-size: 0.9rem;
   cursor: pointer;
   border: 1px solid transparent;
   transition: all var(--transition-fast);
   text-decoration: none;
+  line-height: 1;
+  vertical-align: middle;
 }
 
 .btn-primary {
@@ -613,8 +616,19 @@ table.custom-table tr:hover td {
 }
 
 .btn-sm {
-  padding: 0.4rem 0.85rem;
+  padding: 0.35rem 0.65rem;
   font-size: 0.82rem;
+  height: 32px;
+  min-width: 32px;
+  border-radius: var(--radius-sm);
+}
+
+.action-buttons-group {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  vertical-align: middle;
 }
 
 /* Native Modal Dialog */

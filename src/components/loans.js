@@ -3,6 +3,10 @@ import { showToast } from './toast.js';
 
 let filterStatus = 'ACTIVE'; // 'ACTIVE', 'RETURNED', 'OVERDUE', 'ALL'
 
+export function setLoansFilter(status = 'ALL') {
+  filterStatus = status;
+}
+
 export function renderLoans(container) {
   const currentUser = store.getCurrentUser();
   const isLibrarian = currentUser.role === 'librarian';
@@ -80,10 +84,12 @@ export function renderLoans(container) {
                 <td><span class="status-tag ${statusClass}">${statusLabel}</span></td>
                 ${isLibrarian ? `
                   <td style="text-align:right;">
-                    ${loan.status === 'Emprestado' ? `
-                      <button class="btn btn-secondary btn-sm btn-renew-loan" data-id="${loan.id}" title="Renovar +14 Dias">⏳ Renovar</button>
-                      <button class="btn btn-primary btn-sm btn-return-loan" data-id="${loan.id}">↩️ Devolver</button>
-                    ` : '<span style="color:var(--text-dim); font-size:0.8rem;">Concluído</span>'}
+                    <div class="action-buttons-group">
+                      ${loan.status === 'Emprestado' ? `
+                        <button class="btn btn-secondary btn-sm btn-renew-loan" data-id="${loan.id}" title="Renovar +14 Dias">⏳ Renovar</button>
+                        <button class="btn btn-primary btn-sm btn-return-loan" data-id="${loan.id}">↩️ Devolver</button>
+                      ` : '<span style="color:var(--text-dim); font-size:0.8rem;">Concluído</span>'}
+                    </div>
                   </td>
                 ` : ''}
               </tr>

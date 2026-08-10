@@ -48,6 +48,21 @@ function initApp() {
     checkAuthState();
   });
 
+  // Manual Refresh Handler
+  const btnRefresh = document.getElementById('btn-manual-refresh');
+  if (btnRefresh) {
+    btnRefresh.addEventListener('click', async () => {
+      showToast('A atualizar dados da biblioteca...', 'info');
+      try {
+        await store.fetchFromCloud();
+      } catch (err) {
+        console.warn('Cloud fetch on refresh:', err);
+      }
+      renderCurrentView();
+      showToast('Dados da biblioteca atualizados!', 'success');
+    });
+  }
+
   document.getElementById('user-profile-btn').addEventListener('click', () => {
     store.logout();
     checkAuthState();

@@ -77,11 +77,13 @@ export function renderMembers(container) {
                 </td>
                 ${isLibrarian ? `
                   <td style="text-align:right;">
-                    ${isPending ? `
-                      <button class="btn btn-secondary btn-sm btn-approve-member" data-id="${member.id}" style="background:rgba(16, 185, 129, 0.2); color:#10b981; border-color:rgba(16, 185, 129, 0.4);" title="Aprovar Conta de Leitor">✅ Aprovar</button>
-                    ` : ''}
-                    <button class="btn btn-secondary btn-sm btn-edit-member" data-id="${member.id}">✏️</button>
-                    <button class="btn btn-danger btn-sm btn-delete-member" data-id="${member.id}">🗑️</button>
+                    <div class="action-buttons-group">
+                      ${isPending ? `
+                        <button class="btn btn-secondary btn-sm btn-approve-member" data-id="${member.id}" style="background:rgba(16, 185, 129, 0.2); color:#10b981; border-color:rgba(16, 185, 129, 0.4);" title="Aprovar Conta de Leitor">✅ Aprovar</button>
+                      ` : ''}
+                      <button class="btn btn-secondary btn-sm btn-edit-member" data-id="${member.id}" title="Editar Leitor">✏️</button>
+                      <button class="btn btn-danger btn-sm btn-delete-member" data-id="${member.id}" title="Eliminar Leitor">🗑️</button>
+                    </div>
                   </td>
                 ` : ''}
               </tr>
