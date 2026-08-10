@@ -123,7 +123,7 @@ class LibraryStore extends EventTarget {
     this.notifyChange();
   }
 
-  login(email) {
+  login(email, password = '') {
     if (!email || !email.trim()) {
       throw new Error('Por favor insira um endereço de email.');
     }
@@ -141,6 +141,11 @@ class LibraryStore extends EventTarget {
 
     if (existing.status === 'pending') {
       throw new Error('A sua conta foi registada, mas ainda se encontra A AGUARDAR APROVAÇÃO pelo Bibliotecário.');
+    }
+
+    const expectedPassword = existing.password || '123456';
+    if (password && password.trim() !== expectedPassword) {
+      throw new Error('Palavra-passe incorreta. Por favor verifique os seus dados e tente novamente.');
     }
 
     const userObj = {
@@ -256,7 +261,8 @@ class LibraryStore extends EventTarget {
       phone: memberData.phone ? memberData.phone.trim() : '',
       joinedDate: new Date().toISOString().split('T')[0],
       role: memberData.role || 'patron',
-      status: memberData.status || 'approved'
+      status: memberData.status || 'approved',
+      password: memberData.password || '123456'
     };
     members.push(newMember);
     localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(members));
@@ -280,6 +286,7 @@ class LibraryStore extends EventTarget {
       fullName: userData.fullName,
       email: userData.email,
       phone: userData.phone || '',
+      password: userData.password || '123456',
       role: 'patron',
       status: 'pending' // Requires admin approval!
     });

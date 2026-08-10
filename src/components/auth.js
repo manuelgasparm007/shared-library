@@ -124,12 +124,13 @@ export function renderLandingAuth(container, onSuccess) {
   formLogin.addEventListener('submit', (e) => {
     e.preventDefault();
     const email = loginEmail.value.trim();
+    const password = document.getElementById('login-password').value;
     const loginErrorBanner = document.getElementById('login-error-banner');
 
     if (loginErrorBanner) loginErrorBanner.style.display = 'none';
 
     try {
-      const user = store.login(email);
+      const user = store.login(email, password);
       showToast(`Bem-vindo, ${user.name}!`, 'success');
       if (onSuccess) onSuccess(user);
     } catch (err) {
@@ -147,16 +148,18 @@ export function renderLandingAuth(container, onSuccess) {
     const fullName = document.getElementById('reg-name').value.trim();
     const email = document.getElementById('reg-email').value.trim();
     const phone = document.getElementById('reg-phone').value.trim();
+    const password = document.getElementById('reg-password').value;
     const regErrorBanner = document.getElementById('reg-error-banner');
 
     if (regErrorBanner) regErrorBanner.style.display = 'none';
 
     try {
-      store.registerNewUser({ fullName, email, phone });
+      store.registerNewUser({ fullName, email, phone, password });
       showToast('Conta registada com sucesso! O seu pedido de leitor aguarda aprovação pelo Bibliotecário.', 'success');
 
-      // Switch to login tab and prefill email
+      // Switch to login tab and prefill email and password
       loginEmail.value = email;
+      document.getElementById('login-password').value = password;
       tabLogin.click();
     } catch (err) {
       if (regErrorBanner) {

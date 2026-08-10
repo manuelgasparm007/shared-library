@@ -211,8 +211,10 @@ export function renderSettings(container) {
   if (formChangePassword) {
     formChangePassword.addEventListener('submit', (e) => {
       e.preventDefault();
-      const p1 = document.getElementById('new-password').value;
-      const p2 = document.getElementById('confirm-password').value;
+      const p1El = document.getElementById('new-password');
+      const p2El = document.getElementById('confirm-password');
+      const p1 = p1El ? p1El.value : '';
+      const p2 = p2El ? p2El.value : '';
 
       if (!p1 || p1.length < 4) {
         showToast('A palavra-passe deve ter pelo menos 4 caracteres', 'error');
@@ -226,11 +228,16 @@ export function renderSettings(container) {
 
       try {
         const user = store.getCurrentUser();
-        const member = store.getMembers().find(m => m.email.toLowerCase() === user.email.toLowerCase()) || user;
-        store.updateMemberPassword(member.id, p1);
+        if (!user) throw new Error('Utilizador não autenticado');
+        
+        const member = store.getMembers().find(m => m.email && m.email.toLowerCase() === user.email.toLowerCase()) || user;
+        store.updateMemberPassword(member.id || 'M000', p1);
         showToast('Palavra-passe alterada com sucesso!', 'success');
-        document.getElementById('new-password').value = '';
-        document.getElementById('confirm-password').value = '';
+        
+        const freshP1 = document.getElementById('new-password');
+        const freshP2 = document.getElementById('confirm-password');
+        if (freshP1) freshP1.value = '';
+        if (freshP2) freshP2.value = '';
       } catch (err) {
         showToast(err.message, 'error');
       }
