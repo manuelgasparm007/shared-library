@@ -68,127 +68,141 @@ export function renderSettings(container) {
         <h3>🚪 Sessão do Utilizador</h3>
         <p style="color:var(--text-muted); font-size:0.88rem;">Termine a sessão ativa em segurança neste dispositivo.</p>
         <button id="btn-settings-logout" class="btn btn-danger btn-sm" style="align-self:flex-start;">🚪 Terminar Sessão</button>
-      </div>
-
-      ${isLibrarian ? `
-        <!-- Backup & Data Management Card (Admin Only) -->
-        <div style="background:var(--bg-card); border:1px solid var(--border-glass); border-radius:var(--radius-lg); padding:1.5rem; display:flex; flex-direction:column; gap:1.25rem;">
-          <h3>💾 Cópias de Segurança (Backup JSON)</h3>
-          <p style="color:var(--text-muted); font-size:0.88rem;">Guarde um instantâneo completo de todos os livros, leitores e histórico de empréstimos em ficheiro JSON, ou restaure dados guardados anteriormente.</p>
-
-          <div style="display:flex; flex-direction:column; gap:0.75rem;">
-            <button id="btn-export-backup" class="btn btn-primary">📥 Exportar Cópia de Segurança (JSON)</button>
-            
-            <div style="position:relative;">
-              <input type="file" id="import-file-input" accept=".json" style="display:none;">
-              <button id="btn-trigger-import" class="btn btn-secondary" style="width:100%;">📤 Importar Ficheiro de Cópia (JSON)</button>
-            </div>
-            
-            <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border-glass);">
-              <button id="btn-reset-seed" class="btn btn-danger btn-sm" style="width:100%;">🔄 Repor Dados Iniciais do Excel (Reset)</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Supabase Cloud Sync Card (Admin Only) -->
-        <div style="background:var(--bg-card); border:1px solid var(--border-glass); border-radius:var(--radius-lg); padding:1.5rem; display:flex; flex-direction:column; gap:1.25rem;">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h3>🌩️ Sincronização Cloud (Supabase)</h3>
-            <span class="status-tag ${isCloudActive ? 'available' : 'borrowed'}">
-              ${isCloudActive ? '🟢 Ativa' : '⚪ Não Configurada'}
-            </span>
-          </div>
-
-          <p style="color:var(--text-muted); font-size:0.88rem;">Conecte uma base de dados Supabase para sincronização em tempo real entre computadores e telemóveis.</p>
-
-          <form id="cloud-config-form" style="display:flex; flex-direction:column; gap:1rem;">
-            <div class="form-group">
-              <label>Supabase Project URL</label>
-              <input type="url" id="cloud-url" value="${cloudConfig.url || ''}" placeholder="https://xyzcompany.supabase.co">
-            </div>
-
-            <div class="form-group">
-              <label>Supabase Anon Key</label>
-              <input type="password" id="cloud-key" value="${cloudConfig.key || ''}" placeholder="eyJhbGciOiJIUzI1NiIsInR5...">
-            </div>
-
-            <button type="submit" class="btn btn-primary">Guardar Credenciais Cloud</button>
-          </form>
-
-          ${isCloudActive ? `
-            <div style="display:flex; flex-direction:column; gap:0.5rem; padding-top:0.75rem; border-top:1px solid var(--border-glass);">
-              <button id="btn-cloud-push" class="btn btn-secondary btn-sm">⬆️ Enviar Todos os Dados para o Supabase (Push All)</button>
-              <button id="btn-cloud-pull" class="btn btn-secondary btn-sm">⬇️ Carregar Dados do Supabase (Pull Remote)</button>
-            </div>
-          ` : ''}
-
-          <div style="font-size:0.8rem; color:var(--text-dim); background:var(--bg-glass); padding:0.75rem; border-radius:var(--radius-md);">
-            ℹ️ <strong>Ficheiro SQL Incluído:</strong> Execute o ficheiro <code style="color:var(--accent-primary);">supabase_schema.sql</code> no Editor SQL do Supabase para criar as tabelas automaticamente.
-          </div>
-        </div>
-
-        <!-- Toast & Popup Messages Logger Card (Admin Only) -->
-        <div style="grid-column: 1 / -1; background:var(--bg-card); border:1px solid var(--border-glass); border-radius:var(--radius-lg); padding:1.5rem; display:flex; flex-direction:column; gap:1.25rem;">
-          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
-            <div>
-              <h3>📜 Registos de Notificações & Popups (${filteredLogs.length})</h3>
-              <p style="color:var(--text-muted); font-size:0.88rem;">Histórico auditável de todas as mensagens popups e eventos apresentados na aplicação.</p>
-            </div>
-            <div style="display:flex; gap:0.5rem;">
-              <button id="btn-export-logs" class="btn btn-secondary btn-sm">📥 Exportar Registos (JSON)</button>
-              <button id="btn-clear-logs" class="btn btn-danger btn-sm">🧹 Limpar Registos</button>
-            </div>
-          </div>
-
-          <!-- Log Search & Filter Controls -->
-          <div style="display:grid; grid-template-columns: 2fr 1fr; gap:1rem;">
-            <div class="form-group" style="margin:0;">
-              <input type="text" id="log-search-input" placeholder="🔍 Pesquisar por mensagem ou utilizador..." value="${logSearchQuery}">
-            </div>
-            <div class="form-group" style="margin:0;">
-              <select id="log-type-filter">
-                <option value="ALL" ${logFilterType === 'ALL' ? 'selected' : ''}>Todos os Tipos (${toastLogs.length})</option>
-                <option value="success" ${logFilterType === 'success' ? 'selected' : ''}>✓ Sucesso (${toastLogs.filter(l => l.type === 'success').length})</option>
-                <option value="error" ${logFilterType === 'error' ? 'selected' : ''}>✕ Erro (${toastLogs.filter(l => l.type === 'error').length})</option>
-                <option value="info" ${logFilterType === 'info' ? 'selected' : ''}>ℹ️ Informação (${toastLogs.filter(l => l.type === 'info').length})</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Logs Table -->
-          <div class="table-container" style="max-height: 320px; overflow-y: auto;">
-            <table class="custom-table" style="font-size:0.85rem;">
-              <thead>
-                <tr>
-                  <th>Data & Hora</th>
-                  <th>Tipo</th>
-                  <th>Utilizador / Origem</th>
-                  <th>Mensagem do Popup</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${filteredLogs.length === 0 ? '<tr><td colspan="4" style="text-align:center; color:var(--text-dim);">Nenhum registo de notificação encontrado</td></tr>' : ''}
-                ${filteredLogs.map(log => {
-                  const badgeClass = log.type === 'success' ? 'available' : (log.type === 'error' ? 'overdue' : 'borrowed');
-                  const badgeLabel = log.type === 'success' ? '✓ Sucesso' : (log.type === 'error' ? '✕ Erro' : 'ℹ️ Informação');
-                  return `
-                    <tr>
-                      <td style="white-space:nowrap; color:var(--text-muted); font-size:0.8rem;"><strong>${log.timestamp}</strong></td>
-                      <td><span class="status-tag ${badgeClass}">${badgeLabel}</span></td>
-                      <td>
-                        <strong>${log.user}</strong>
-                        ${log.userEmail !== 'N/A' ? `<div style="font-size:0.75rem; color:var(--text-dim);">${log.userEmail}</div>` : ''}
-                      </td>
-                      <td>${log.message}</td>
-                    </tr>
-                  `;
-                }).join('')}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      ` : ''}
     </div>
+
+    ${isLibrarian ? `
+      <!-- Dedicated IT & Technical Admin Section -->
+      <div style="margin-top:1.5rem;">
+        <details style="background:var(--bg-card); border:1px solid var(--border-glass); border-radius:var(--radius-lg); padding:1.25rem; transition:all 0.2s;" open>
+          <summary style="cursor:pointer; font-weight:700; font-size:1.15rem; color:var(--accent-primary); display:flex; align-items:center; justify-content:space-between; list-style:none; outline:none;">
+            <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
+              <span>🛠️ Área Técnica, IT & Administração Avançada</span>
+              <span style="font-size:0.75rem; background:rgba(239, 68, 68, 0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.3); padding:0.15rem 0.5rem; border-radius:var(--radius-sm); font-weight:600;">⚠️ Reservado a IT & Manutenção</span>
+            </div>
+            <span style="font-size:0.85rem; font-weight:500; color:var(--text-muted);">🔽 Clique para expandir / ocultar</span>
+          </summary>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem; margin-top:1.25rem; padding-top:1.25rem; border-top:1px solid var(--border-glass);">
+            <!-- Backup & Data Management Card (Admin Only) -->
+            <div style="background:var(--bg-glass); border:1px solid var(--border-glass); border-radius:var(--radius-md); padding:1.25rem; display:flex; flex-direction:column; gap:1.25rem;">
+              <h3>💾 Cópias de Segurança (Backup JSON)</h3>
+              <p style="color:var(--text-muted); font-size:0.88rem;">Guarde um instantâneo completo de todos os livros, leitores e histórico de empréstimos em ficheiro JSON, ou restaure dados guardados anteriormente.</p>
+
+              <div style="display:flex; flex-direction:column; gap:0.75rem;">
+                <button id="btn-export-backup" class="btn btn-primary">📥 Exportar Cópia de Segurança (JSON)</button>
+                
+                <div style="position:relative;">
+                  <input type="file" id="import-file-input" accept=".json" style="display:none;">
+                  <button id="btn-trigger-import" class="btn btn-secondary" style="width:100%;">📤 Importar Ficheiro de Cópia (JSON)</button>
+                </div>
+                
+                <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border-glass);">
+                  <button id="btn-reset-seed" class="btn btn-danger btn-sm" style="width:100%;">🔄 Repor Dados Iniciais do Excel (Reset)</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Supabase Cloud Sync Card (Admin Only) -->
+            <div style="background:var(--bg-glass); border:1px solid var(--border-glass); border-radius:var(--radius-md); padding:1.25rem; display:flex; flex-direction:column; gap:1.25rem;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>🌩️ Sincronização Cloud (Supabase)</h3>
+                <span class="status-tag ${isCloudActive ? 'available' : 'borrowed'}">
+                  ${isCloudActive ? '🟢 Ativa' : '⚪ Não Configurada'}
+                </span>
+              </div>
+
+              <p style="color:var(--text-muted); font-size:0.88rem;">Conecte uma base de dados Supabase para sincronização em tempo real entre computadores e telemóveis.</p>
+
+              <form id="cloud-config-form" style="display:flex; flex-direction:column; gap:1rem;">
+                <div class="form-group">
+                  <label>Supabase Project URL</label>
+                  <input type="url" id="cloud-url" value="${cloudConfig.url || ''}" placeholder="https://xyzcompany.supabase.co">
+                </div>
+
+                <div class="form-group">
+                  <label>Supabase Anon Key</label>
+                  <input type="password" id="cloud-key" value="${cloudConfig.key || ''}" placeholder="eyJhbGciOiJIUzI1NiIsInR5...">
+                </div>
+
+                <button type="submit" class="btn btn-primary">Guardar Credenciais Cloud</button>
+              </form>
+
+              ${isCloudActive ? `
+                <div style="display:flex; flex-direction:column; gap:0.5rem; padding-top:0.75rem; border-top:1px solid var(--border-glass);">
+                  <button id="btn-cloud-push" class="btn btn-secondary btn-sm">⬆️ Enviar Todos os Dados para o Supabase (Push All)</button>
+                  <button id="btn-cloud-pull" class="btn btn-secondary btn-sm">⬇️ Carregar Dados do Supabase (Pull Remote)</button>
+                </div>
+              ` : ''}
+
+              <div style="font-size:0.8rem; color:var(--text-dim); background:var(--bg-card); padding:0.75rem; border-radius:var(--radius-md);">
+                ℹ️ <strong>Ficheiro SQL Incluído:</strong> Execute o ficheiro <code style="color:var(--accent-primary);">supabase_schema.sql</code> no Editor SQL do Supabase para criar as tabelas automaticamente.
+              </div>
+            </div>
+
+            <!-- Toast & Popup Messages Logger Card (Admin Only) -->
+            <div style="grid-column: 1 / -1; background:var(--bg-glass); border:1px solid var(--border-glass); border-radius:var(--radius-md); padding:1.25rem; display:flex; flex-direction:column; gap:1.25rem;">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+                <div>
+                  <h3>📜 Registos de Notificações & Popups (${filteredLogs.length})</h3>
+                  <p style="color:var(--text-muted); font-size:0.88rem;">Histórico auditável de todas as mensagens popups e eventos apresentados na aplicação.</p>
+                </div>
+                <div style="display:flex; gap:0.5rem;">
+                  <button id="btn-export-logs" class="btn btn-secondary btn-sm">📥 Exportar Registos (JSON)</button>
+                  <button id="btn-clear-logs" class="btn btn-danger btn-sm">🧹 Limpar Registos</button>
+                </div>
+              </div>
+
+              <!-- Log Search & Filter Controls -->
+              <div style="display:grid; grid-template-columns: 2fr 1fr; gap:1rem;">
+                <div class="form-group" style="margin:0;">
+                  <input type="text" id="log-search-input" placeholder="🔍 Pesquisar por mensagem ou utilizador..." value="${logSearchQuery}">
+                </div>
+                <div class="form-group" style="margin:0;">
+                  <select id="log-type-filter">
+                    <option value="ALL" ${logFilterType === 'ALL' ? 'selected' : ''}>Todos os Tipos (${toastLogs.length})</option>
+                    <option value="success" ${logFilterType === 'success' ? 'selected' : ''}>✓ Sucesso (${toastLogs.filter(l => l.type === 'success').length})</option>
+                    <option value="error" ${logFilterType === 'error' ? 'selected' : ''}>✕ Erro (${toastLogs.filter(l => l.type === 'error').length})</option>
+                    <option value="info" ${logFilterType === 'info' ? 'selected' : ''}>ℹ️ Informação (${toastLogs.filter(l => l.type === 'info').length})</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Logs Table -->
+              <div class="table-container" style="max-height: 320px; overflow-y: auto;">
+                <table class="custom-table" style="font-size:0.85rem;">
+                  <thead>
+                    <tr>
+                      <th>Data & Hora</th>
+                      <th>Tipo</th>
+                      <th>Utilizador / Origem</th>
+                      <th>Mensagem do Popup</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${filteredLogs.length === 0 ? '<tr><td colspan="4" style="text-align:center; color:var(--text-dim);">Nenhum registo de notificação encontrado</td></tr>' : ''}
+                    ${filteredLogs.map(log => {
+                      const badgeClass = log.type === 'success' ? 'available' : (log.type === 'error' ? 'overdue' : 'borrowed');
+                      const badgeLabel = log.type === 'success' ? '✓ Sucesso' : (log.type === 'error' ? '✕ Erro' : 'ℹ️ Informação');
+                      return `
+                        <tr>
+                          <td style="white-space:nowrap; color:var(--text-muted); font-size:0.8rem;"><strong>${log.timestamp}</strong></td>
+                          <td><span class="status-tag ${badgeClass}">${badgeLabel}</span></td>
+                          <td>
+                            <strong>${log.user}</strong>
+                            ${log.userEmail !== 'N/A' ? `<div style="font-size:0.75rem; color:var(--text-dim);">${log.userEmail}</div>` : ''}
+                          </td>
+                          <td>${log.message}</td>
+                        </tr>
+                      `;
+                    }).join('')}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </details>
+      </div>
+    ` : ''}
   `;
 
   container.innerHTML = settingsHtml;

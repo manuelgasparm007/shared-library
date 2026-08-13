@@ -41,7 +41,7 @@ Funciona de forma fluida em qualquer dispositivo — **computadores, telemóveis
 | **👥 Directório de Leitores** | Gestão de membros com eliminação inteligente (<b>Hard-Delete</b> para leitores sem histórico e <b>Soft-Delete / Desativação</b> para leitores com empréstimos passados, preservando o histórico). Aprovação prévia e redefinição de palavra-passe. | [📘 Ver Guia](./docs/USER_MANUAL.md#3-direct%C3%B3rio-de-leitores--contas) |
 | **📊 Painel de Controlo (Dashboard)** | Indicadores gerais em tempo real (KPIs de coleção, livros disponíveis, emprestados e em atraso), estatísticas por género e histórico das requisições mais recentes. | [📘 Ver Guia](./docs/USER_MANUAL.md#4-painel-principal-dashboard) |
 | **🎨 Personalização & Mobile UI** | Tema predefinido **🌿 Camomila Oficial** (Verde Sálvia `#498b7c`, Amarelo `#f2d549` e botões *pill-style* arredondados), 5 temas alternativos e barra de navegação móvel. | [📘 Ver Guia](./docs/USER_MANUAL.md#5-personaliza%C3%A7%C3%A3o-visual--experi%C3%AAncia-mobile) |
-| **⚙️ Definições & Auditoria** | Pesquisa global sincronizada, sanitização XSS (`escapeHtml`), cópias de segurança em JSON, sincronização em tempo real com Supabase Cloud e registos auditáveis de notificações. | [📘 Ver Guia](./docs/USER_MANUAL.md#6-defini%C3%A7%C3%B5es-auditoria--sincroniza%C3%A7%C3%A3o-cloud-admin) |
+| **⚙️ Definições & Área IT** | Secção dedicada e isolada **🛠️ Área Técnica & IT** (evitando alterações acidentais ao guardar cópias JSON, sincronizar com Supabase Cloud ou gerir registos auditáveis), personalização visual e palavra-passe. | [📘 Ver Guia](./docs/USER_MANUAL.md#6-defini%C3%A7%C3%B5es-auditoria--sincroniza%C3%A7%C3%A3o-cloud-admin) |
 
 ---
 
