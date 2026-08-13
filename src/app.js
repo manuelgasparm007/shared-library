@@ -64,22 +64,26 @@ function initApp() {
 
   // Listen to store updates
   store.addEventListener('store-change', () => {
-    checkAuthState();
+    checkAuthState(false);
   });
 
   // Check initial authentication state
-  checkAuthState();
+  checkAuthState(true);
 }
 
-function checkAuthState() {
+let currentSessionEmail = null;
+
+function checkAuthState(isInitial = false) {
   const currentUser = store.getCurrentUser();
   const appShell = document.getElementById('app');
   const authPortal = document.getElementById('auth-portal');
 
   if (!currentUser) {
+    currentSessionEmail = null;
     if (appShell) appShell.style.display = 'none';
     if (authPortal) authPortal.style.display = 'block';
     renderLandingAuth(authPortal, (user) => {
+      currentSessionEmail = user ? user.email : null;
       authPortal.innerHTML = '';
       if (authPortal) authPortal.style.display = 'none';
       if (appShell) appShell.style.display = 'flex';
@@ -91,9 +95,14 @@ function checkAuthState() {
     authPortal.innerHTML = '';
     if (authPortal) authPortal.style.display = 'none';
     if (appShell) appShell.style.display = 'flex';
-    const targetDefaultView = currentUser.role === 'librarian' ? 'dashboard' : 'catalog';
     updateUserUI(currentUser);
-    switchView(targetDefaultView);
+
+    // Only switch view on initial app load or when switching user sessions
+    if (isInitial || !currentSessionEmail || currentSessionEmail.toLowerCase() !== currentUser.email.toLowerCase()) {
+      currentSessionEmail = currentUser.email;
+      const targetDefaultView = currentUser.role === 'librarian' ? 'dashboard' : 'catalog';
+      switchView(targetDefaultView);
+    }
   }
 }
 
