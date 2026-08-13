@@ -9,7 +9,7 @@ export function renderSettings(container) {
   const isLibrarian = currentUser.role === 'librarian';
   const cloudConfig = store.getCloudConfig();
   const isCloudActive = !!(cloudConfig.url && cloudConfig.key);
-  const currentTheme = localStorage.getItem('library_theme') || 'parchment';
+  const currentTheme = localStorage.getItem('library_theme') || 'camomila';
 
   const toastLogs = store.getToastLogs();
   const filteredLogs = toastLogs.filter(log => {
@@ -36,8 +36,8 @@ export function renderSettings(container) {
         <div class="form-group" style="max-width: 420px; margin:0;">
           <label>Tema Ativo da Aplicação</label>
           <select id="settings-theme-selector">
-            <option value="parchment" ${currentTheme === 'parchment' ? 'selected' : ''}>📜 Pergaminho (Sépia - Defeito)</option>
-            <option value="camomila" ${currentTheme === 'camomila' ? 'selected' : ''}>🌿 Camomila (Verde Nature)</option>
+            <option value="camomila" ${currentTheme === 'camomila' ? 'selected' : ''}>🌿 Camomila Oficial (Verde & Amarelo - Defeito)</option>
+            <option value="parchment" ${currentTheme === 'parchment' ? 'selected' : ''}>📜 Pergaminho (Sépia Clássico)</option>
             <option value="dark" ${currentTheme === 'dark' ? 'selected' : ''}>🌙 Escuro (Midnight Glass)</option>
             <option value="light" ${currentTheme === 'light' ? 'selected' : ''}>☀️ Claro (Nórdico Alabastro)</option>
             <option value="violet" ${currentTheme === 'violet' ? 'selected' : ''}>💜 Violeta (Cyber Violet)</option>
