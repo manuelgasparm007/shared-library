@@ -36,11 +36,12 @@ Funciona de forma fluida em qualquer dispositivo — **computadores, telemóveis
 
 | Módulo | Descrição & Funcionalidades | Detalhes no Manual |
 | :--- | :--- | :---: |
-| **📖 Catálogo Literário** | Alternância instantânea entre **🖼️ Galeria de Capas** e **📋 Tabela Detalhada**. Ordenação rápida por qualquer coluna e pesquisa automática por ISBN/capas via Google Books e Open Library APIs. | [📘 Ver Guia](./docs/USER_MANUAL.md#12-navegar-no-catálogo) |
-| **🔄 Empréstimos & Devoluções** | Registo de requisições em segundos, cálculo automático de prazos de devolução, identificação visual de empréstimos em atraso e renovações de prazo com 1 clique. | [📘 Ver Guia](./docs/USER_MANUAL.md#22-registar-empréstimo-presencial) |
-| **👥 Directório de Leitores** | Gestão completa de membros, fluxo de aprovação prévia de novas contas registadas e redefinição rápida de palavras-passe. | [📘 Ver Guia](./docs/USER_MANUAL.md#21-aprovação-de-novas-contas) |
-| **📊 Painel de Controlo (Dashboard)** | Indicadores gerais em tempo real (KPIs de coleção, livros disponíveis, emprestados e em atraso), estatísticas por género e histórico das requisições mais recentes. | [📘 Ver Guia](./docs/USER_MANUAL.md#-2-guia-do-bibliotecário-administrador) |
-| **🎨 Personalização & Mobile UI** | Seleção entre 5 temas visuais (*📜 Pergaminho Sépia*, *<img src="./public/favicon.png" width="16" height="16" align="absmiddle"> Camomila Verde*, *🌙 Midnight Escuro*, *☀️ Nórdico*, *💜 Cyber Violet*) e barra de navegação móvel ao alcance do polegar. | [📘 Ver Guia](./docs/USER_MANUAL.md#15-personalização-de-temas-visuais) |
+| **📖 Catálogo Literário** | Alternância instantânea entre **🖼️ Galeria de Capas** e **📋 Tabela Detalhada**. Ordenação rápida por qualquer coluna e pesquisa automática por ISBN/capas via Google Books e Open Library APIs. | [📘 Ver Guia](./docs/USER_MANUAL.md#1-cat%C3%A1logo-liter%C3%A1rio--consulta-de-livros) |
+| **🔄 Empréstimos & Devoluções** | Registo de requisições em segundos, cálculo automático de prazos de devolução, identificação visual de empréstimos em atraso e renovações de prazo com 1 clique. | [📘 Ver Guia](./docs/USER_MANUAL.md#2-controlo-de-empr%C3%A9stimos--devolu%C3%A7%C3%B5es) |
+| **👥 Directório de Leitores** | Gestão completa de membros, fluxo de aprovação prévia de novas contas registadas e redefinição rápida de palavras-passe. | [📘 Ver Guia](./docs/USER_MANUAL.md#3-direct%C3%B3rio-de-leitores--contas) |
+| **📊 Painel de Controlo (Dashboard)** | Indicadores gerais em tempo real (KPIs de coleção, livros disponíveis, emprestados e em atraso), estatísticas por género e histórico das requisições mais recentes. | [📘 Ver Guia](./docs/USER_MANUAL.md#4-painel-principal-dashboard) |
+| **🎨 Personalização & Mobile UI** | Seleção entre 5 temas visuais (*📜 Pergaminho Sépia*, *<img src="./public/favicon.png" width="16" height="16" align="absmiddle"> Camomila Verde*, *🌙 Midnight Escuro*, *☀️ Nórdico*, *💜 Cyber Violet*) e barra de navegação móvel ao alcance do polegar. | [📘 Ver Guia](./docs/USER_MANUAL.md#5-personaliza%C3%A7%C3%A3o-visual--experi%C3%AAncia-mobile) |
+| **⚙️ Definições & Auditoria** | Cópias de segurança em JSON, sincronização em tempo real com Supabase Cloud e registos auditáveis de notificações e popups (Audit Log). | [📘 Ver Guia](./docs/USER_MANUAL.md#6-defini%C3%A7%C3%B5es-auditoria--sincroniza%C3%A7%C3%A3o-cloud-admin) |
 
 ---
 
@@ -60,13 +61,13 @@ Funciona de forma fluida em qualquer dispositivo — **computadores, telemóveis
       <td><b>👑 Bibliotecário (Admin)</b></td>
       <td>📊 <i>Painel Principal</i></td>
       <td>Acesso total ao sistema: criação, edição e eliminação de livros, aprovação de leitores, registo de empréstimos e devoluções, cópias de segurança (JSON) e histórico auditável de notificações.</td>
-      <td><a href="./docs/USER_MANUAL.md#-2-guia-do-bibliotecário-administrador">📘 Guia do Bibliotecário</a></td>
+      <td><a href="./docs/USER_MANUAL.md#6-defini%C3%A7%C3%B5es-auditoria--sincroniza%C3%A7%C3%A3o-cloud-admin">📘 Guia do Bibliotecário</a></td>
     </tr>
     <tr>
       <td><b>👤 Leitor (Membro)</b></td>
       <td>📖 <i>Catálogo de Livros</i></td>
       <td>Consulta e pesquisa no catálogo completo, acesso aos detalhes das obras, histórico de requisições pessoais (<i>Os Meus Empréstimos</i>) e alteração do tema visual.</td>
-      <td><a href="./docs/USER_MANUAL.md#-1-guia-do-leitor-membro">📘 Guia do Leitor</a></td>
+      <td><a href="./docs/USER_MANUAL.md#1-cat%C3%A1logo-liter%C3%A1rio--consulta-de-livros">📘 Guia do Leitor</a></td>
     </tr>
   </tbody>
 </table>
