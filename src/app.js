@@ -44,17 +44,23 @@ function initApp() {
   const currentTheme = localStorage.getItem('library_theme') || 'parchment';
   document.documentElement.setAttribute('data-theme', currentTheme);
 
-  // Logout Click Listener
-  document.getElementById('btn-logout').addEventListener('click', (e) => {
-    e.stopPropagation();
-    store.logout();
-    checkAuthState();
-  });
+  // Logout Click Listeners
+  const btnLogout = document.getElementById('btn-logout');
+  if (btnLogout) {
+    btnLogout.addEventListener('click', (e) => {
+      e.stopPropagation();
+      store.logout();
+      showToast('Sessão terminada com sucesso.', 'info');
+    });
+  }
 
-  document.getElementById('user-profile-btn').addEventListener('click', () => {
-    store.logout();
-    checkAuthState();
-  });
+  const userProfileBtn = document.getElementById('user-profile-btn');
+  if (userProfileBtn) {
+    userProfileBtn.addEventListener('click', () => {
+      store.logout();
+      showToast('Sessão terminada com sucesso.', 'info');
+    });
+  }
 
   // Listen to store updates
   store.addEventListener('store-change', () => {
@@ -72,8 +78,10 @@ function checkAuthState() {
 
   if (!currentUser) {
     if (appShell) appShell.style.display = 'none';
+    if (authPortal) authPortal.style.display = 'block';
     renderLandingAuth(authPortal, (user) => {
       authPortal.innerHTML = '';
+      if (authPortal) authPortal.style.display = 'none';
       if (appShell) appShell.style.display = 'flex';
       const targetDefaultView = user.role === 'librarian' ? 'dashboard' : 'catalog';
       updateUserUI(user);
@@ -81,6 +89,7 @@ function checkAuthState() {
     });
   } else {
     authPortal.innerHTML = '';
+    if (authPortal) authPortal.style.display = 'none';
     if (appShell) appShell.style.display = 'flex';
     const targetDefaultView = currentUser.role === 'librarian' ? 'dashboard' : 'catalog';
     updateUserUI(currentUser);

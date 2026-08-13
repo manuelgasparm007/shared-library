@@ -63,6 +63,13 @@ export function renderSettings(container) {
         </form>
       </div>
 
+      <!-- Logout Card (All Users) -->
+      <div style="background:var(--bg-card); border:1px solid var(--border-glass); border-radius:var(--radius-lg); padding:1.5rem; display:flex; flex-direction:column; gap:1rem;">
+        <h3>🚪 Sessão do Utilizador</h3>
+        <p style="color:var(--text-muted); font-size:0.88rem;">Termine a sessão ativa em segurança neste dispositivo.</p>
+        <button id="btn-settings-logout" class="btn btn-danger btn-sm" style="align-self:flex-start;">🚪 Terminar Sessão</button>
+      </div>
+
       ${isLibrarian ? `
         <!-- Backup & Data Management Card (Admin Only) -->
         <div style="background:var(--bg-card); border:1px solid var(--border-glass); border-radius:var(--radius-lg); padding:1.5rem; display:flex; flex-direction:column; gap:1.25rem;">
@@ -241,6 +248,15 @@ export function renderSettings(container) {
       } catch (err) {
         showToast(err.message, 'error');
       }
+    });
+  }
+
+  // Bind Settings Logout Button for All Users
+  const btnSettingsLogout = document.getElementById('btn-settings-logout');
+  if (btnSettingsLogout) {
+    btnSettingsLogout.addEventListener('click', () => {
+      store.logout();
+      showToast('Sessão terminada com sucesso.', 'info');
     });
   }
 

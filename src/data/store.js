@@ -126,14 +126,13 @@ class LibraryStore extends EventTarget {
   }
 
   logout() {
-    try { localStorage.removeItem(STORAGE_KEYS.USER); } catch (e) {}
+    this.setCurrentUser(null);
     try { sessionStorage.clear(); } catch (e) {}
     document.cookie.split(";").forEach((c) => {
       document.cookie = c
         .replace(/^ +/, "")
         .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
     });
-    this.notifyChange();
   }
 
   login(email, password = '') {
