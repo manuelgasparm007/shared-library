@@ -186,6 +186,10 @@ async function fetchGlobalBookInfo(query) {
   return (result.title || result.author) ? result : null;
 }
 
+export function setCatalogSearchQuery(query) {
+  searchQuery = query || '';
+}
+
 export function renderCatalog(container) {
   const currentUser = store.getCurrentUser();
   const isLibrarian = currentUser.role === 'librarian';

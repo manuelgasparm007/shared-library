@@ -1,7 +1,7 @@
 import { store } from './data/store.js';
 import { renderLandingAuth } from './components/auth.js';
 import { renderDashboard } from './components/dashboard.js';
-import { renderCatalog, resetCatalogFilters } from './components/catalog.js';
+import { renderCatalog, resetCatalogFilters, setCatalogSearchQuery } from './components/catalog.js';
 import { renderMembers } from './components/members.js';
 import { renderLoans } from './components/loans.js';
 import { renderSettings } from './components/settings.js';
@@ -33,12 +33,18 @@ function initApp() {
 
   // Global Search Input
   const globalSearch = document.getElementById('global-search-input');
-  globalSearch.addEventListener('input', (e) => {
-    const val = e.target.value.trim();
-    if (val && currentView !== 'catalog') {
-      switchView('catalog');
-    }
-  });
+  if (globalSearch) {
+    globalSearch.addEventListener('input', (e) => {
+      const val = e.target.value.trim();
+      setCatalogSearchQuery(val);
+      if (val && currentView !== 'catalog') {
+        switchView('catalog');
+      } else if (currentView === 'catalog') {
+        const viewport = document.getElementById('content-viewport');
+        if (viewport) renderCatalog(viewport);
+      }
+    });
+  }
 
   // Initialize active theme (Default to Official Camomila Theme)
   const currentTheme = localStorage.getItem('library_theme') || 'camomila';
