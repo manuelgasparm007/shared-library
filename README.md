@@ -1,4 +1,4 @@
-# 🌿 Biblioteca Camomila
+# <img src="./public/favicon.png" width="30" height="30" align="absmiddle" alt="Camomila Icon"> Biblioteca Camomila
 
 > **Plataforma Digital de Gestão de Biblioteca Partilhada**  
 > 🌐 **Aceder à Aplicação:** [https://biblioteca-camomila.vercel.app/](https://biblioteca-camomila.vercel.app/)
@@ -38,7 +38,7 @@ Funciona de forma fluida tanto em computadores como em telemóveis e tablets, of
 - **Atividades Recentes**: Lista dos últimos empréstimos efetuados na biblioteca.
 
 ### 🎨 5. Personalização Visual & Experiência Mobile
-- **Temas de Cores**: Escolha o seu estilo preferido (*📜 Pergaminho Sépia*, *🌿 Camomila Verde*, *🌙 Escuro Midnight*, *☀️ Claro Nórdico*, *💜 Violeta Cyber*).
+- **Temas de Cores**: Escolha o seu estilo preferido (*📜 Pergaminho Sépia*, *<img src="./public/favicon.png" width="16" height="16" align="absmiddle" alt="Camomila"> Camomila Verde*, *🌙 Escuro Midnight*, *☀️ Claro Nórdico*, *💜 Violeta Cyber*).
 - **📱 Navegação no Telemóvel**: Barra de navegação inferior estilo aplicação móvel para acesso rápido e confortável pelo polegar.
 
 ---
@@ -101,4 +101,4 @@ npm run build
 ---
 
 ## 📄 Licença
-Desenvolvido para a **Biblioteca Camomila** 🌿. Todos os direitos reservados.
+Desenvolvido para a **Biblioteca Camomila** <img src="./public/favicon.png" width="18" height="18" align="absmiddle" alt="Camomila Icon">. Todos os direitos reservados.
