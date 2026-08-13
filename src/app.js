@@ -40,8 +40,8 @@ function initApp() {
     }
   });
 
-  // Initialize active theme
-  const currentTheme = localStorage.getItem('library_theme') || 'parchment';
+  // Initialize active theme (Default to Official Camomila Theme)
+  const currentTheme = localStorage.getItem('library_theme') || 'camomila';
   document.documentElement.setAttribute('data-theme', currentTheme);
 
   // Logout Click Listeners
