@@ -29,9 +29,12 @@ export function renderLoans(container) {
     return true;
   });
 
+  const allBooks = store.getBooks();
+  const bookMap = new Map(allBooks.map(b => [b.id, b]));
+
   filteredLoans.sort((a, b) => {
-    const bookA = store.getBookById(a.bookId);
-    const bookB = store.getBookById(b.bookId);
+    const bookA = bookMap.get(a.bookId);
+    const bookB = bookMap.get(b.bookId);
     const titleA = bookA ? bookA.title : a.bookId;
     const titleB = bookB ? bookB.title : b.bookId;
 
