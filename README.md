@@ -6,7 +6,7 @@
 
   <p>
     <a href="https://biblioteca-camomila.vercel.app/"><img src="https://img.shields.io/badge/Live_Demo-Vercel-10b981?style=for-the-badge&logo=vercel&logoColor=white" alt="Vercel Live Demo"></a>
-    <a href="#-funcionalidades-principais"><img src="https://img.shields.io/badge/Versão-1.0_Estável-6366f1?style=for-the-badge" alt="Versão Estável"></a>
+    <a href="./docs/USER_MANUAL.md"><img src="https://img.shields.io/badge/Manual-Documentação_Completa-6366f1?style=for-the-badge&logo=readme&logoColor=white" alt="Manual de Utilização"></a>
     <a href="#-níveis-de-acesso"><img src="https://img.shields.io/badge/Perfil-Bibliotecário_&_Leitor-f59e0b?style=for-the-badge" alt="Perfis de Acesso"></a>
   </p>
 
@@ -14,7 +14,7 @@
 
   <p align="center">
     <a href="https://biblioteca-camomila.vercel.app/">🌐 <b>Aceder à Aplicação Web</b></a> &nbsp;•&nbsp;
-    <a href="#-apresentação-do-sistema">📌 <b>Sobre o Sistema</b></a> &nbsp;•&nbsp;
+    <a href="./docs/USER_MANUAL.md">📘 <b>Manual de Utilização</b></a> &nbsp;•&nbsp;
     <a href="#-funcionalidades-principais">✨ <b>Funcionalidades</b></a> &nbsp;•&nbsp;
     <a href="#-níveis-de-acesso">🔐 <b>Perfis</b></a> &nbsp;•&nbsp;
     <a href="#-informação-técnica--instalação-para-desenvolvedores--it">🛠️ <b>Área Técnica & IT</b></a>
@@ -34,13 +34,13 @@ Funciona de forma fluida em qualquer dispositivo — **computadores, telemóveis
 
 ## ✨ Funcionalidades Principais
 
-| Módulo | Descrição & Funcionalidades |
-| :--- | :--- |
-| **📖 Catálogo Literário** | Alternância instantânea entre **🖼️ Galeria de Capas** e **📋 Tabela Detalhada**. Ordenação rápida por qualquer coluna e pesquisa automática por ISBN/capas via Google Books e Open Library APIs. |
-| **🔄 Empréstimos & Devoluções** | Registo de requisições em segundos, cálculo automático de prazos de devolução, identificação visual de empréstimos em atraso e renovações de prazo com 1 clique. |
-| **👥 Directório de Leitores** | Gestão completa de membros, fluxo de aprovação prévia de novas contas registadas e redefinição rápida de palavras-passe. |
-| **📊 Painel de Controlo (Dashboard)** | Indicadores gerais em tempo real (KPIs de coleção, livros disponíveis, emprestados e em atraso), estatísticas por género e histórico das requisições mais recentes. |
-| **🎨 Personalização & Mobile UI** | Seleção entre 5 temas visuais (*📜 Pergaminho Sépia*, *<img src="./public/favicon.png" width="16" height="16" align="absmiddle"> Camomila Verde*, *🌙 Midnight Escuro*, *☀️ Nórdico*, *💜 Cyber Violet*) e barra de navegação móvel ao alcance do polegar. |
+| Módulo | Descrição & Funcionalidades | Detalhes no Manual |
+| :--- | :--- | :---: |
+| **📖 Catálogo Literário** | Alternância instantânea entre **🖼️ Galeria de Capas** e **📋 Tabela Detalhada**. Ordenação rápida por qualquer coluna e pesquisa automática por ISBN/capas via Google Books e Open Library APIs. | [📘 Ver Guia](./docs/USER_MANUAL.md#12-navegar-no-catálogo) |
+| **🔄 Empréstimos & Devoluções** | Registo de requisições em segundos, cálculo automático de prazos de devolução, identificação visual de empréstimos em atraso e renovações de prazo com 1 clique. | [📘 Ver Guia](./docs/USER_MANUAL.md#22-registar-empréstimo-presencial) |
+| **👥 Directório de Leitores** | Gestão completa de membros, fluxo de aprovação prévia de novas contas registadas e redefinição rápida de palavras-passe. | [📘 Ver Guia](./docs/USER_MANUAL.md#21-aprovação-de-novas-contas) |
+| **📊 Painel de Controlo (Dashboard)** | Indicadores gerais em tempo real (KPIs de coleção, livros disponíveis, emprestados e em atraso), estatísticas por género e histórico das requisições mais recentes. | [📘 Ver Guia](./docs/USER_MANUAL.md#-2-guia-do-bibliotecário-administrador) |
+| **🎨 Personalização & Mobile UI** | Seleção entre 5 temas visuais (*📜 Pergaminho Sépia*, *<img src="./public/favicon.png" width="16" height="16" align="absmiddle"> Camomila Verde*, *🌙 Midnight Escuro*, *☀️ Nórdico*, *💜 Cyber Violet*) e barra de navegação móvel ao alcance do polegar. | [📘 Ver Guia](./docs/USER_MANUAL.md#15-personalização-de-temas-visuais) |
 
 ---
 
@@ -52,6 +52,7 @@ Funciona de forma fluida em qualquer dispositivo — **computadores, telemóveis
       <th>Perfil de Utilizador</th>
       <th>Ecrã Inicial</th>
       <th>Permissões & Ações Disponíveis</th>
+      <th>Manual Detalhado</th>
     </tr>
   </thead>
   <tbody>
@@ -59,11 +60,13 @@ Funciona de forma fluida em qualquer dispositivo — **computadores, telemóveis
       <td><b>👑 Bibliotecário (Admin)</b></td>
       <td>📊 <i>Painel Principal</i></td>
       <td>Acesso total ao sistema: criação, edição e eliminação de livros, aprovação de leitores, registo de empréstimos e devoluções, cópias de segurança (JSON) e histórico auditável de notificações.</td>
+      <td><a href="./docs/USER_MANUAL.md#-2-guia-do-bibliotecário-administrador">📘 Guia do Bibliotecário</a></td>
     </tr>
     <tr>
       <td><b>👤 Leitor (Membro)</b></td>
       <td>📖 <i>Catálogo de Livros</i></td>
       <td>Consulta e pesquisa no catálogo completo, acesso aos detalhes das obras, histórico de requisições pessoais (<i>Os Meus Empréstimos</i>) e alteração do tema visual.</td>
+      <td><a href="./docs/USER_MANUAL.md#-1-guia-do-leitor-membro">📘 Guia do Leitor</a></td>
     </tr>
   </tbody>
 </table>
@@ -78,7 +81,7 @@ Funciona de forma fluida em qualquer dispositivo — **computadores, telemóveis
 <br>
 
 > [!NOTE]
-> Esta secção destina-se exclusivamente a equipas técnicas, manutenção de servidores e desenvolvedores.
+> Esta secção destina-se exclusivamente a equipas técnicas, manutenção de servidores e desenvolvedores. Para o guia de utilização técnica detalhado, consulte o documento [`docs/DEVELOPER_GUIDE.md`](./docs/DEVELOPER_GUIDE.md).
 
 ### ⚙️ Arquitetura & Tecnologias
 - **Frontend**: HTML5, Vanilla JavaScript (ES6 Modules), CSS3 (Custom Properties & Glassmorphism).
