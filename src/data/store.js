@@ -126,13 +126,16 @@ class LibraryStore extends EventTarget {
   }
 
   logout() {
-    this.setCurrentUser(null);
+    this.currentUser = null;
+    try { localStorage.removeItem(STORAGE_KEYS.USER); } catch (e) {}
+    try { sessionStorage.removeItem(STORAGE_KEYS.USER); } catch (e) {}
     try { sessionStorage.clear(); } catch (e) {}
     document.cookie.split(";").forEach((c) => {
       document.cookie = c
         .replace(/^ +/, "")
         .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
     });
+    this.notifyChange();
   }
 
   login(email, password = '') {
@@ -168,11 +171,6 @@ class LibraryStore extends EventTarget {
 
     this.setCurrentUser(userObj);
     return userObj;
-  }
-
-  logout() {
-    localStorage.removeItem(STORAGE_KEYS.USER);
-    this.notifyChange();
   }
 
   getBooks() {

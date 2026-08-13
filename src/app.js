@@ -44,23 +44,16 @@ function initApp() {
   const currentTheme = localStorage.getItem('library_theme') || 'camomila';
   document.documentElement.setAttribute('data-theme', currentTheme);
 
-  // Logout Click Listeners
-  const btnLogout = document.getElementById('btn-logout');
-  if (btnLogout) {
-    btnLogout.addEventListener('click', (e) => {
+  // Global Logout Click Delegation for all users (Patron and Librarian)
+  document.addEventListener('click', (e) => {
+    const logoutTarget = e.target.closest('#btn-logout, #user-profile-btn, #btn-settings-logout, .btn-do-logout');
+    if (logoutTarget) {
+      e.preventDefault();
       e.stopPropagation();
       store.logout();
       showToast('Sessão terminada com sucesso.', 'info');
-    });
-  }
-
-  const userProfileBtn = document.getElementById('user-profile-btn');
-  if (userProfileBtn) {
-    userProfileBtn.addEventListener('click', () => {
-      store.logout();
-      showToast('Sessão terminada com sucesso.', 'info');
-    });
-  }
+    }
+  });
 
   // Listen to store updates
   store.addEventListener('store-change', () => {
