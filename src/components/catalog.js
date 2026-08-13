@@ -71,7 +71,7 @@ async function fetchGlobalBookInfo(query) {
   // 1. Try Open Library Bibkeys API for direct ISBN search
   if (isDirectIsbnSearch) {
     try {
-      const olRes = await fetch(`https://openlibrary.org/api/books?bibkeys=ISBN:${cleanIsbn}&format=json&jscmd=data`);
+      const olRes = await fetch(`https://openlibrary.org/api/books?bibkeys=ISBN:${cleanIsbn}&format=json&jscmd=data`, { signal: AbortSignal.timeout(5000) });
       if (olRes.ok) {
         const olData = await olRes.json();
         const bookKey = `ISBN:${cleanIsbn}`;
@@ -113,7 +113,7 @@ async function fetchGlobalBookInfo(query) {
 
       for (const q of gbQueries) {
         if (result.title && result.coverUrl) break;
-        const gbRes = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}`);
+        const gbRes = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}`, { signal: AbortSignal.timeout(5000) });
         if (gbRes.ok) {
           const gbData = await gbRes.json();
           if (gbData.items && gbData.items.length > 0) {
@@ -155,7 +155,7 @@ async function fetchGlobalBookInfo(query) {
 
       for (const sq of searchQueries) {
         if (result.title && result.author) break;
-        const olSearchRes = await fetch(`https://openlibrary.org/search.json?${sq}`);
+        const olSearchRes = await fetch(`https://openlibrary.org/search.json?${sq}`, { signal: AbortSignal.timeout(5000) });
         if (olSearchRes.ok) {
           const olSearchData = await olSearchRes.json();
           if (olSearchData && olSearchData.docs && olSearchData.docs.length > 0) {
