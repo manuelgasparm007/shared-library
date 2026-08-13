@@ -32,130 +32,140 @@ async function fetchGlobalBookInfo(query) {
     shelfLocation: ''
   };
 
+  if (!query || !query.trim()) return null;
+
   const cleanIsbn = query.replace(/[^0-9X]/gi, '');
   const isDirectIsbnSearch = (cleanIsbn.length === 10 || cleanIsbn.length === 13);
-
-  // 0. First check local catalog / initial data for instantaneous lookup
-  try {
-    const localBooks = store.getBooks();
-    const match = localBooks.find(b => {
-      const bIsbn = (b.isbn || '').replace(/[^0-9X]/gi, '');
-      if (isDirectIsbnSearch && bIsbn && bIsbn === cleanIsbn) return true;
-      return b.title && b.title.toLowerCase().includes(query.toLowerCase());
-    });
-
-    if (match) {
-      result.title = match.title || '';
-      result.author = match.author || '';
-      result.pubYear = match.pubYear || null;
-      result.publisher = match.publisher || '';
-      result.isbn = match.isbn || cleanIsbn;
-      result.coverUrl = match.coverUrl || '';
-      result.synopsis = match.synopsis || '';
-      result.genre = match.genre || '';
-      result.shelfLocation = match.shelfLocation || '';
-    }
-  } catch (e) {}
-
-  // 1. Try Google Books API (High accuracy for ISBN-13 and cover art)
-  try {
-    const gbQuery = isDirectIsbnSearch ? `isbn:${cleanIsbn}` : query;
-    const gbRes = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(gbQuery)}`);
-    if (gbRes.ok) {
-      const gbData = await gbRes.json();
-      if (gbData.items && gbData.items.length > 0) {
-        const info = gbData.items[0].volumeInfo;
-        if (info.title) result.title = info.title;
-        if (info.authors) result.author = info.authors.join(', ');
-        if (info.publishedDate) result.pubYear = parseInt(info.publishedDate.substring(0, 4)) || result.pubYear;
-        if (info.publisher) result.publisher = info.publisher;
-        if (info.description) result.synopsis = info.description;
-
-        // Extract ISBN 13 or ISBN 10
-        if (info.industryIdentifiers && Array.isArray(info.industryIdentifiers)) {
-          const isbn13 = info.industryIdentifiers.find(i => i.type === 'ISBN_13');
-          const isbn10 = info.industryIdentifiers.find(i => i.type === 'ISBN_10');
-          result.isbn = isbn13 ? isbn13.identifier : (isbn10 ? isbn10.identifier : info.industryIdentifiers[0].identifier || result.isbn);
-        }
-
-        // Extract Cover URL
-        if (info.imageLinks) {
-          let img = info.imageLinks.thumbnail || info.imageLinks.smallThumbnail || '';
-          if (img.startsWith('http://')) img = img.replace('http://', 'https://');
-          if (img) result.coverUrl = img;
-        }
-      }
-    }
-  } catch (err) {
-    console.warn('Google Books API lookup error:', err);
+  if (isDirectIsbnSearch) {
+    result.isbn = cleanIsbn;
   }
 
-  // 2. Direct Open Library ISBN JSON API (Highly reliable for exact ISBNs)
-  if (isDirectIsbnSearch && (!result.title || !result.coverUrl)) {
+  // 1. Try Open Library Bibkeys API (Fastest & most reliable for ISBNs, no CORS/429 limits)
+  if (isDirectIsbnSearch) {
     try {
-      const olIsbnRes = await fetch(`https://openlibrary.org/isbn/${cleanIsbn}.json`);
-      if (olIsbnRes.ok) {
-        const olIsbnData = await olIsbnRes.json();
-        if (!result.title && olIsbnData.title) result.title = olIsbnData.title;
-        if (!result.publisher && olIsbnData.publishers && olIsbnData.publishers.length > 0) {
-          result.publisher = olIsbnData.publishers[0];
-        }
-        if (!result.pubYear && olIsbnData.publish_date) {
-          const matchYear = olIsbnData.publish_date.match(/\d{4}/);
-          if (matchYear) result.pubYear = parseInt(matchYear[0]);
-        }
-        if (!result.coverUrl && olIsbnData.covers && olIsbnData.covers.length > 0) {
-          result.coverUrl = `https://covers.openlibrary.org/b/id/${olIsbnData.covers[0]}-L.jpg`;
-        }
-      }
-    } catch (e) {}
-  }
-
-  // 3. Complement / fallback with Open Library Search API
-  if (!result.title || !result.author || !result.coverUrl) {
-    try {
-      let olUrl = `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}`;
-      if (isDirectIsbnSearch) {
-        olUrl = `https://openlibrary.org/search.json?isbn=${cleanIsbn}`;
-      }
-
-      const olRes = await fetch(olUrl);
+      const olRes = await fetch(`https://openlibrary.org/api/books?bibkeys=ISBN:${cleanIsbn}&format=json&jscmd=data`);
       if (olRes.ok) {
         const olData = await olRes.json();
-        if (olData && olData.docs && olData.docs.length > 0) {
-          const doc = olData.docs[0];
-          if (!result.title) result.title = doc.title || '';
+        const bookKey = `ISBN:${cleanIsbn}`;
+        if (olData && olData[bookKey]) {
+          const item = olData[bookKey];
+          if (item.title) result.title = item.title;
+          if (item.authors && item.authors.length > 0) {
+            result.author = item.authors.map(a => a.name).join(', ');
+          }
+          if (item.publish_date) {
+            const y = item.publish_date.match(/\d{4}/);
+            if (y) result.pubYear = parseInt(y[0]);
+          }
+          if (item.publishers && item.publishers.length > 0) {
+            result.publisher = typeof item.publishers[0] === 'string' ? item.publishers[0] : (item.publishers[0].name || '');
+          }
+          if (item.cover) {
+            result.coverUrl = item.cover.large || item.cover.medium || item.cover.small || '';
+          }
+          if (item.notes) {
+            result.synopsis = typeof item.notes === 'string' ? item.notes : (item.notes.value || '');
+          }
+          if (item.subjects && item.subjects.length > 0) {
+            result.genre = item.subjects.slice(0, 2).map(s => s.name).join(', ');
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('Open Library bibkeys lookup error:', err);
+    }
+  }
+
+  // 2. Try Google Books API (High accuracy for covers and sinopsis)
+  if (!result.title || !result.coverUrl) {
+    try {
+      const gbQuery = isDirectIsbnSearch ? `isbn:${cleanIsbn}` : query;
+      const gbRes = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(gbQuery)}`);
+      if (gbRes.ok) {
+        const gbData = await gbRes.json();
+        if (gbData.items && gbData.items.length > 0) {
+          const info = gbData.items[0].volumeInfo;
+          if (!result.title && info.title) result.title = info.title;
+          if (!result.author && info.authors) result.author = info.authors.join(', ');
+          if (!result.pubYear && info.publishedDate) {
+            const y = info.publishedDate.substring(0, 4);
+            if (y) result.pubYear = parseInt(y);
+          }
+          if (!result.publisher && info.publisher) result.publisher = info.publisher;
+          if (!result.synopsis && info.description) result.synopsis = info.description;
+
+          if (!result.isbn && info.industryIdentifiers && Array.isArray(info.industryIdentifiers)) {
+            const isbn13 = info.industryIdentifiers.find(i => i.type === 'ISBN_13');
+            const isbn10 = info.industryIdentifiers.find(i => i.type === 'ISBN_10');
+            result.isbn = isbn13 ? isbn13.identifier : (isbn10 ? isbn10.identifier : info.industryIdentifiers[0].identifier || '');
+          }
+
+          if (!result.coverUrl && info.imageLinks) {
+            let img = info.imageLinks.thumbnail || info.imageLinks.smallThumbnail || '';
+            if (img.startsWith('http://')) img = img.replace('http://', 'https://');
+            if (img) result.coverUrl = img;
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('Google Books API lookup error:', err);
+    }
+  }
+
+  // 3. Fallback to Open Library Search API
+  if (!result.title || !result.author) {
+    try {
+      const olSearchUrl = isDirectIsbnSearch
+        ? `https://openlibrary.org/search.json?isbn=${cleanIsbn}`
+        : `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}`;
+      const olSearchRes = await fetch(olSearchUrl);
+      if (olSearchRes.ok) {
+        const olSearchData = await olSearchRes.json();
+        if (olSearchData && olSearchData.docs && olSearchData.docs.length > 0) {
+          const doc = olSearchData.docs[0];
+          if (!result.title && doc.title) result.title = doc.title;
           if (!result.author && doc.author_name) result.author = doc.author_name[0];
           if (!result.pubYear) result.pubYear = doc.first_publish_year || (doc.publish_date ? parseInt(doc.publish_date[0]) : null);
           if (!result.publisher && doc.publisher) result.publisher = doc.publisher[0];
-          if (!result.synopsis && doc.first_sentence) {
-            result.synopsis = Array.isArray(doc.first_sentence) ? doc.first_sentence[0] : doc.first_sentence;
-          }
-
-          if (!result.isbn) {
-            if (isDirectIsbnSearch) {
-              result.isbn = cleanIsbn;
-            } else if (doc.isbn && Array.isArray(doc.isbn)) {
-              const bestIsbn = doc.isbn.find(i => (i.startsWith('978') || i.startsWith('979')) && i.length === 13) || doc.isbn[0];
-              result.isbn = bestIsbn;
-            }
-          }
-
           if (!result.coverUrl && doc.cover_i) {
             result.coverUrl = `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`;
           }
         }
       }
     } catch (err) {
-      console.warn('Open Library API lookup error:', err);
+      console.warn('Open Library Search lookup error:', err);
     }
+  }
+
+  // 4. Local collection fallback if APIs return nothing
+  if (!result.title) {
+    try {
+      const localBooks = store.getBooks();
+      const match = localBooks.find(b => {
+        const bIsbn = (b.isbn || '').replace(/[^0-9X]/gi, '');
+        if (isDirectIsbnSearch && bIsbn && bIsbn === cleanIsbn) return true;
+        return b.title && b.title.toLowerCase().includes(query.toLowerCase());
+      });
+
+      if (match) {
+        result.title = match.title || '';
+        result.author = match.author || '';
+        result.pubYear = match.pubYear || null;
+        result.publisher = match.publisher || '';
+        result.isbn = match.isbn || cleanIsbn;
+        result.coverUrl = match.coverUrl || '';
+        result.synopsis = match.synopsis || '';
+        result.genre = match.genre || '';
+        result.shelfLocation = match.shelfLocation || '';
+      }
+    } catch (e) {}
   }
 
   if (isDirectIsbnSearch && !result.isbn) {
     result.isbn = cleanIsbn;
   }
 
-  return (result.title || result.author || result.isbn) ? result : null;
+  return (result.title || result.author) ? result : null;
 }
 
 export function renderCatalog(container) {
