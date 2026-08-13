@@ -1,7 +1,26 @@
-# <img src="./public/favicon.png" width="30" height="30" align="absmiddle" alt="Camomila Icon"> Biblioteca Camomila
+<div align="center">
+  <br>
+  <img src="./public/favicon.png" width="90" height="90" alt="Biblioteca Camomila Logo">
+  <h1>Biblioteca Camomila</h1>
+  <p><strong>Plataforma Digital Moderna de Gestão de Biblioteca Partilhada</strong></p>
 
-> **Plataforma Digital de Gestão de Biblioteca Partilhada**  
-> 🌐 **Aceder à Aplicação:** [https://biblioteca-camomila.vercel.app/](https://biblioteca-camomila.vercel.app/)
+  <p>
+    <a href="https://biblioteca-camomila.vercel.app/"><img src="https://img.shields.io/badge/Live_Demo-Vercel-10b981?style=for-the-badge&logo=vercel&logoColor=white" alt="Vercel Live Demo"></a>
+    <a href="#-funcionalidades-principais"><img src="https://img.shields.io/badge/Versão-1.0_Estável-6366f1?style=for-the-badge" alt="Versão Estável"></a>
+    <a href="#-níveis-de-acesso"><img src="https://img.shields.io/badge/Perfil-Bibliotecário_&_Leitor-f59e0b?style=for-the-badge" alt="Perfis de Acesso"></a>
+  </p>
+
+  <br>
+
+  <p align="center">
+    <a href="https://biblioteca-camomila.vercel.app/">🌐 <b>Aceder à Aplicação Web</b></a> &nbsp;•&nbsp;
+    <a href="#-apresentação-do-sistema">📌 <b>Sobre o Sistema</b></a> &nbsp;•&nbsp;
+    <a href="#-funcionalidades-principais">✨ <b>Funcionalidades</b></a> &nbsp;•&nbsp;
+    <a href="#-níveis-de-acesso">🔐 <b>Perfis</b></a> &nbsp;•&nbsp;
+    <a href="#-informação-técnica--instalação-para-desenvolvedores--it">🛠️ <b>Área Técnica & IT</b></a>
+  </p>
+  <br>
+</div>
 
 ---
 
@@ -9,58 +28,54 @@
 
 A **Biblioteca Camomila** é uma solução web moderna, intuitiva e acessível, desenvolvida para simplificar a gestão de acervos literários, o catálogo de livros, as requisições/empréstimos e o registo de leitores.
 
-Funciona de forma fluida tanto em computadores como em telemóveis e tablets, oferecendo uma experiência de utilização organizada, rápida e elegante.
+Funciona de forma fluida em qualquer dispositivo — **computadores, telemóveis e tablets** — oferecendo uma experiência de utilização organizada, rápida e elegante.
 
 ---
 
-## ✨ Funcionalidades Principais (Visão Funcional)
+## ✨ Funcionalidades Principais
 
-### 📖 1. Catálogo Literário & Consulta de Livros
-- **Vistas Personalizadas**: Alterne entre a vista em **🖼️ Galeria de Capas** e a vista em **📋 Tabela Detalhada**.
-- **Ordenação Rápida**: Clique em qualquer coluna (ID, Título, Autor, Género, Ano, ISBN, Estado) para ordenar de A a Z, Z a A ou por datas.
-- **⚡ Preenchimento Automático por ISBN / Título**: Ao adicionar um novo livro, o sistema pesquisa automaticamente em bases de dados mundiais (**Google Books** e **Open Library**) e preenche o autor, ano, sinopse e capa da obra.
-- **Múltiplos Géneros**: Atribuição de várias categorias a uma mesma obra (ex: *Ficção Científica, Romance*).
-- **Pesquisa em Tempo Real**: Encontre rapidamente qualquer obra pelo título, autor ou ISBN sem perder o foco de escrita.
-
-### 🔄 2. Controlo de Empréstimos & Devoluções
-- **Requisição Simples**: Registe o empréstimo de um livro a um leitor em poucos segundos.
-- **Prazos Automáticos**: O sistema calcula a data limite de devolução e assinala visualmente os empréstimos **Em Atraso**.
-- **Histórico & Renovação**: Acompanhe o histórico de requisições e renove prazos com 1 clique.
-
-### 👥 3. Directório de Leitores & Aprovação de Contas
-- **Gestão de Membros**: Lista completa de todos os utilizadores registados na biblioteca.
-- **Aprovação de Novos Registos**: Os novos leitores que criam conta ficam em estado *Aguardar Aprovação* até serem validados pelo Bibliotecário.
-- **Gestão de Palavras-Passe**: Opção direta nas definições e no diretório para redefinir palavras-passe de forma simples.
-
-### 📊 4. Painel Principal (Dashboard)
-- **Indicadores Rápidos (KPIs)**: Visualize imediatamente o número total de livros, quantos estão disponíveis, quantos estão emprestados e quantos estão em atraso.
-- **Estatísticas por Género**: Gráficos visuais com a distribuição dos livros por categoria ordenados alfabeticamente.
-- **Atividades Recentes**: Lista dos últimos empréstimos efetuados na biblioteca.
-
-### 🎨 5. Personalização Visual & Experiência Mobile
-- **Temas de Cores**: Escolha o seu estilo preferido (*📜 Pergaminho Sépia*, *<img src="./public/favicon.png" width="16" height="16" align="absmiddle" alt="Camomila"> Camomila Verde*, *🌙 Escuro Midnight*, *☀️ Claro Nórdico*, *💜 Violeta Cyber*).
-- **📱 Navegação no Telemóvel**: Barra de navegação inferior estilo aplicação móvel para acesso rápido e confortável pelo polegar.
+| Módulo | Descrição & Funcionalidades |
+| :--- | :--- |
+| **📖 Catálogo Literário** | Alternância instantânea entre **🖼️ Galeria de Capas** e **📋 Tabela Detalhada**. Ordenação rápida por qualquer coluna e pesquisa automática por ISBN/capas via Google Books e Open Library APIs. |
+| **🔄 Empréstimos & Devoluções** | Registo de requisições em segundos, cálculo automático de prazos de devolução, identificação visual de empréstimos em atraso e renovações de prazo com 1 clique. |
+| **👥 Directório de Leitores** | Gestão completa de membros, fluxo de aprovação prévia de novas contas registadas e redefinição rápida de palavras-passe. |
+| **📊 Painel de Controlo (Dashboard)** | Indicadores gerais em tempo real (KPIs de coleção, livros disponíveis, emprestados e em atraso), estatísticas por género e histórico das requisições mais recentes. |
+| **🎨 Personalização & Mobile UI** | Seleção entre 5 temas visuais (*📜 Pergaminho Sépia*, *<img src="./public/favicon.png" width="16" height="16" align="absmiddle"> Camomila Verde*, *🌙 Midnight Escuro*, *☀️ Nórdico*, *💜 Cyber Violet*) e barra de navegação móvel ao alcance do polegar. |
 
 ---
 
 ## 🔐 Níveis de Acesso
 
-O sistema distingue automaticamente dois tipos de utilizadores:
-
-1. **👑 Bibliotecário / Administrador**:
-   - Acesso total: gestão do catálogo, criação/edição/eliminação de livros, aprovação de leitores, registo de empréstimos, cópias de segurança e histórico de notificações.
-   - **Ecrã Inicial**: *Painel Principal (Dashboard)*.
-
-2. **👤 Leitor / Membro**:
-   - Acesso à consulta do catálogo, detalhes dos livros, histórico dos seus próprios empréstimos (*Os Meus Empréstimos*) e personalização do tema visual.
-   - **Ecrã Inicial**: *Catálogo de Livros*.
+<table>
+  <thead>
+    <tr>
+      <th>Perfil de Utilizador</th>
+      <th>Ecrã Inicial</th>
+      <th>Permissões & Ações Disponíveis</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>👑 Bibliotecário (Admin)</b></td>
+      <td>📊 <i>Painel Principal</i></td>
+      <td>Acesso total ao sistema: criação, edição e eliminação de livros, aprovação de leitores, registo de empréstimos e devoluções, cópias de segurança (JSON) e histórico auditável de notificações.</td>
+    </tr>
+    <tr>
+      <td><b>👤 Leitor (Membro)</b></td>
+      <td>📖 <i>Catálogo de Livros</i></td>
+      <td>Consulta e pesquisa no catálogo completo, acesso aos detalhes das obras, histórico de requisições pessoais (<i>Os Meus Empréstimos</i>) e alteração do tema visual.</td>
+    </tr>
+  </tbody>
+</table>
 
 ---
+
 <br>
 
----
+<details>
+<summary><b>🛠️ Informação Técnica & Instalação (Clique para expandir)</b></summary>
 
-## 🛠️ Informação Técnica & Instalação (Para Desenvolvedores / IT)
+<br>
 
 > [!NOTE]
 > Esta secção destina-se exclusivamente a equipas técnicas, manutenção de servidores e desenvolvedores.
@@ -98,7 +113,10 @@ npm run build
 - **Backup JSON**: Exportação e importação completa de dados locais.
 - **Excel Seed**: Suporte a repor os dados base a partir da folha Excel original [`Gestão de Biblioteca Partilhada excel.xlsx`](./Gestão%20de%20Biblioteca%20Partilhada%20excel.xlsx).
 
+</details>
+
 ---
 
-## 📄 Licença
-Desenvolvido para a **Biblioteca Camomila** <img src="./public/favicon.png" width="18" height="18" align="absmiddle" alt="Camomila Icon">. Todos os direitos reservados.
+<div align="center">
+  <p>Desenvolvido para a <b>Biblioteca Camomila</b> <img src="./public/favicon.png" width="18" height="18" align="absmiddle" alt="Camomila Icon">. Todos os direitos reservados.</p>
+</div>
