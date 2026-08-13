@@ -378,22 +378,31 @@ class LibraryStore extends EventTarget {
 
   deleteMember(id) {
     const member = this.getMembers().find(m => m.id === id);
-    const activeLoans = this.getLoans().filter(l => (l.memberId === id || (member && (l.memberEmail || '').toLowerCase() === (member.email || '').toLowerCase())) && l.status === 'Emprestado');
+    const loans = this.getLoans();
+    const memberLoans = loans.filter(l => (l.memberId === id || (member && (l.memberEmail || '').toLowerCase() === (member.email || '').toLowerCase())));
+    const activeLoans = memberLoans.filter(l => l.status === 'Emprestado');
 
     if (activeLoans.length > 0) {
       const memberName = member ? member.fullName : id;
-      throw new Error(`Impossível desativar o leitor "${memberName}": possui ${activeLoans.length} livro(s) com empréstimo ativo. Efectue a devolução dos livros antes de desativar o leitor.`);
+      throw new Error(`Impossível desativar o leitor "${memberName}": possui ${activeLoans.length} livro(s) com empréstimo ativo. Efectue a devolução dos livros antes de desativar a conta.`);
     }
 
     let members = this.getMembers();
-    // Soft-delete: update status to 'inactive' to preserve historical loan references
-    members = members.map(m => m.id === id ? { ...m, status: 'inactive' } : m);
-    localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(members));
-    this.notifyChange();
 
-    // Async sync updated inactive status to cloud
-    const updated = members.find(m => m.id === id);
-    if (updated) this.syncMemberToCloud(updated);
+    if (memberLoans.length === 0) {
+      // Hard Delete: purge user record if 0 total loans ever existed
+      members = members.filter(m => m.id !== id);
+      localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(members));
+      this.notifyChange();
+      this.deleteMemberFromCloud(id);
+    } else {
+      // Soft Delete: set status to 'inactive' to preserve historical loan references
+      members = members.map(m => m.id === id ? { ...m, status: 'inactive' } : m);
+      localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(members));
+      this.notifyChange();
+      const updated = members.find(m => m.id === id);
+      if (updated) this.syncMemberToCloud(updated);
+    }
   }
 
   // --- Loans Methods ---
