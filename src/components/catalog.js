@@ -528,6 +528,8 @@ function openBookModal(book, onSave) {
       </div>
 
       <form id="form-book" class="modal-body" style="max-height:70vh; overflow-y:auto;">
+        <div id="book-modal-error" style="display:none; padding:0.75rem; background:rgba(239, 68, 68, 0.15); border:1px solid rgba(239, 68, 68, 0.4); color:#ef4444; border-radius:var(--radius-md); font-size:0.85rem; font-weight:600; margin-bottom:1rem;"></div>
+
         <!-- Auto Lookup Box -->
         <div style="background:var(--bg-glass); border:1px solid var(--border-glass); border-radius:var(--radius-md); padding:0.85rem; margin-bottom:1rem; display:flex; flex-direction:column; gap:0.4rem;">
           <label style="font-weight:700; font-size:0.82rem; color:var(--accent-primary); display:flex; align-items:center; gap:0.4rem;">
@@ -725,10 +727,17 @@ function openBookModal(book, onSave) {
   });
 
   document.getElementById('btn-save-book').addEventListener('click', () => {
+    const errorBanner = document.getElementById('book-modal-error');
+    if (errorBanner) errorBanner.style.display = 'none';
+
     const title = document.getElementById('book-title').value.trim();
     const author = document.getElementById('book-author').value.trim();
 
     if (!title || !author) {
+      if (errorBanner) {
+        errorBanner.textContent = '⚠️ Título e Autor são campos obrigatórios.';
+        errorBanner.style.display = 'block';
+      }
       showToast('Título e Autor são obrigatórios', 'error');
       return;
     }
@@ -748,16 +757,24 @@ function openBookModal(book, onSave) {
       synopsis: document.getElementById('book-synopsis').value
     };
 
-    if (isEdit) {
-      store.updateBook(book.id, bookData);
-      showToast('Livro actualizado com sucesso!', 'success');
-    } else {
-      store.addBook(bookData);
-      showToast('Livro adicionado à coleção!', 'success');
-    }
+    try {
+      if (isEdit) {
+        store.updateBook(book.id, bookData);
+        showToast('Livro actualizado com sucesso!', 'success');
+      } else {
+        store.addBook(bookData);
+        showToast('Livro adicionado à coleção!', 'success');
+      }
 
-    closeModal();
-    if (onSave) onSave();
+      closeModal();
+      if (onSave) onSave();
+    } catch (err) {
+      if (errorBanner) {
+        errorBanner.textContent = err.message;
+        errorBanner.style.display = 'block';
+      }
+      showToast(err.message, 'error');
+    }
   });
 }
 

@@ -196,7 +196,37 @@ class LibraryStore extends EventTarget {
 
   addBook(bookData) {
     const books = this.getBooks();
-    const newId = bookData.id || `B${String(books.length + 1).padStart(3, '0')}`;
+    const cleanIsbnInput = (bookData.isbn || '').replace(/[^0-9X]/gi, '');
+    const cleanTitle = (bookData.title || '').trim().toLowerCase();
+    const cleanAuthor = (bookData.author || '').trim().toLowerCase();
+
+    // Check for duplicate entry by ISBN or Title + Author
+    const duplicate = books.find(b => {
+      const cleanExistingIsbn = (b.isbn || '').replace(/[^0-9X]/gi, '');
+      if (cleanIsbnInput && cleanExistingIsbn && cleanIsbnInput === cleanExistingIsbn) {
+        return true;
+      }
+      return (
+        cleanTitle && cleanAuthor &&
+        (b.title || '').trim().toLowerCase() === cleanTitle &&
+        (b.author || '').trim().toLowerCase() === cleanAuthor
+      );
+    });
+
+    if (duplicate) {
+      const reason = (cleanIsbnInput && (duplicate.isbn || '').replace(/[^0-9X]/gi, '') === cleanIsbnInput)
+        ? `mesmo ISBN (${duplicate.isbn || cleanIsbnInput})`
+        : `mesmo Título e Autor ("${duplicate.title}" por ${duplicate.author})`;
+      throw new Error(`Livro duplicado! Já existe uma obra registada com o ${reason} (ID: ${duplicate.id}).`);
+    }
+
+    // Safely calculate next numerical ID
+    const maxIdNum = books.reduce((max, b) => {
+      const num = parseInt((b.id || '').replace(/\D/g, '')) || 0;
+      return num > max ? num : max;
+    }, 0);
+
+    const newId = bookData.id || `B${String(maxIdNum + 1).padStart(3, '0')}`;
     const newBook = {
       id: newId,
       title: bookData.title.trim(),
