@@ -128,7 +128,7 @@ export function renderDashboard(container) {
           ${Object.entries(genreCounts)
             .sort(([genreA], [genreB]) => genreA.localeCompare(genreB, 'pt'))
             .map(([genre, count]) => {
-            const percentage = Math.round((count / totalBooks) * 100);
+            const percentage = totalBooks > 0 ? Math.round((count / totalBooks) * 100) : 0;
             return `
               <div class="genre-item-nav" data-genre="${genre}" style="cursor:pointer;" title="Filtrar Catálogo por ${genre}">
                 <div style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:500; margin-bottom:0.25rem;">
