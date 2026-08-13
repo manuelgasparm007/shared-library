@@ -1,5 +1,6 @@
 import { store } from '../data/store.js';
 import { showToast } from './toast.js';
+import { escapeHtml } from '../utils/sanitize.js';
 
 export function renderLandingAuth(container, onSuccess) {
   const landingHtml = `
@@ -112,7 +113,7 @@ export function renderLandingAuth(container, onSuccess) {
       if (onSuccess) onSuccess(user);
     } catch (err) {
       if (loginErrorBanner) {
-        loginErrorBanner.innerHTML = `⚠️ <strong>Erro de Login:</strong> ${err.message}`;
+        loginErrorBanner.innerHTML = `⚠️ <strong>Erro de Login:</strong> ${escapeHtml(err.message)}`;
         loginErrorBanner.style.display = 'block';
       }
       showToast(`Erro ao entrar: ${err.message}`, 'error');
@@ -140,7 +141,7 @@ export function renderLandingAuth(container, onSuccess) {
       tabLogin.click();
     } catch (err) {
       if (regErrorBanner) {
-        regErrorBanner.innerHTML = `⚠️ <strong>Erro de Registo:</strong> ${err.message}`;
+        regErrorBanner.innerHTML = `⚠️ <strong>Erro de Registo:</strong> ${escapeHtml(err.message)}`;
         regErrorBanner.style.display = 'block';
       }
       showToast(`Erro ao registar: ${err.message}`, 'error');

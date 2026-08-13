@@ -1,5 +1,6 @@
 import { store } from '../data/store.js';
 import { showToast } from './toast.js';
+import { escapeHtml } from '../utils/sanitize.js';
 
 let currentViewMode = 'table'; // 'table' or 'grid'
 let searchQuery = '';
@@ -721,10 +722,10 @@ function openBookModal(book, onSave) {
           }
 
           const displayTitle = fetchedData.title || query;
-          autoStatus.innerHTML = `✅ <strong>Sucesso!</strong> Dados preenchidos para <em>"${displayTitle}"</em>. Pode rever os campos e clicar em <strong>Adicionar à Coleção</strong>.`;
+          autoStatus.innerHTML = `✅ <strong>Sucesso!</strong> Dados preenchidos para <em>"${escapeHtml(displayTitle)}"</em>. Pode rever os campos e clicar em <strong>Adicionar à Coleção</strong>.`;
           showToast('Dados do livro preenchidos! Reveja os campos e clique em Adicionar à Coleção.', 'success');
         } else {
-          autoStatus.innerHTML = `❌ Nenhuma informação encontrada para "<em>${query}</em>". Tente ajustar o ISBN ou título.`;
+          autoStatus.innerHTML = `❌ Nenhuma informação encontrada para "<em>${escapeHtml(query)}</em>". Tente ajustar o ISBN ou título.`;
           showToast('Nenhum resultado encontrado nas bases de dados globais.', 'info');
         }
       } catch (err) {
