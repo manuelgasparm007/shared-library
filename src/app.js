@@ -61,6 +61,14 @@ function initApp() {
     }
   });
 
+  // Listen to browser URL hash changes
+  window.addEventListener('hashchange', () => {
+    const hashView = (window.location.hash || '').replace('#', '').trim();
+    if (hashView && hashView !== currentView) {
+      switchView(hashView);
+    }
+  });
+
   // Listen to store updates
   store.addEventListener('store-change', () => {
     checkAuthState(false);
@@ -99,8 +107,16 @@ function checkAuthState(isInitial = false) {
     // Only switch view on initial app load or when switching user sessions
     if (isInitial || !currentSessionEmail || currentSessionEmail.toLowerCase() !== currentUser.email.toLowerCase()) {
       currentSessionEmail = currentUser.email;
-      const targetDefaultView = currentUser.role === 'librarian' ? 'dashboard' : 'catalog';
-      switchView(targetDefaultView);
+      const savedHash = (window.location.hash || '').replace('#', '').trim();
+      const savedView = savedHash || localStorage.getItem('active_library_view');
+      const defaultRoleView = currentUser.role === 'librarian' ? 'dashboard' : 'catalog';
+      let targetView = savedView || defaultRoleView;
+
+      if (currentUser.role !== 'librarian' && (targetView === 'dashboard' || targetView === 'members')) {
+        targetView = 'catalog';
+      }
+
+      switchView(targetView);
     }
   }
 }
@@ -188,6 +204,11 @@ function updateUserUI(user) {
 
 function switchView(viewName) {
   currentView = viewName;
+  localStorage.setItem('active_library_view', viewName);
+  if (window.location.hash !== '#' + viewName) {
+    window.location.hash = viewName;
+  }
+
   document.querySelectorAll('.nav-item').forEach(item => {
     if (item.dataset.view === viewName) {
       item.classList.add('active');

@@ -2,7 +2,7 @@ import { store } from '../data/store.js';
 import { showToast } from './toast.js';
 import { escapeHtml } from '../utils/sanitize.js';
 
-let currentViewMode = 'table'; // 'table' or 'grid'
+let currentViewMode = localStorage.getItem('catalog_view_mode') || 'table'; // 'table' or 'grid'
 let searchQuery = '';
 let selectedGenre = 'ALL';
 let selectedStatus = 'ALL';
@@ -327,11 +327,13 @@ export function renderCatalog(container) {
   // View Switchers
   document.getElementById('view-grid-btn').addEventListener('click', () => {
     currentViewMode = 'grid';
+    localStorage.setItem('catalog_view_mode', 'grid');
     renderCatalog(container);
   });
 
   document.getElementById('view-table-btn').addEventListener('click', () => {
     currentViewMode = 'table';
+    localStorage.setItem('catalog_view_mode', 'table');
     renderCatalog(container);
   });
 

@@ -71,9 +71,9 @@ export function renderSettings(container) {
     </div>
 
     ${isLibrarian ? `
-      <!-- Dedicated IT & Technical Admin Section -->
-      <div style="margin-top:1.5rem;">
-        <details style="background:var(--bg-card); border:1px solid var(--border-glass); border-radius:var(--radius-lg); padding:1.25rem; transition:all 0.2s;" open>
+      <!-- Dedicated IT & Technical Admin Section (Full Width, Collapsed by Default) -->
+      <div style="margin-top:1.5rem; width:100%;">
+        <details style="background:var(--bg-card); border:1px solid var(--border-glass); border-radius:var(--radius-lg); padding:1.25rem; transition:all 0.2s;">
           <summary style="cursor:pointer; font-weight:700; font-size:1.15rem; color:var(--accent-primary); display:flex; align-items:center; justify-content:space-between; list-style:none; outline:none;">
             <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
               <span>🛠️ Área Técnica, IT & Administração Avançada</span>
