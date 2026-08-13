@@ -81,20 +81,22 @@ export function renderMembers(container) {
         <tbody>
           ${filteredMembers.length === 0 ? '<tr><td colspan="7" style="text-align:center; color:var(--text-dim);">Nenhum leitor encontrado</td></tr>' : ''}
           ${filteredMembers.map(member => {
-            const memberActiveLoans = loans.filter(l => l.memberName === member.fullName && l.status === 'Emprestado');
+            const memberActiveLoans = loans.filter(l => (l.memberId === member.id || l.memberName === member.fullName) && l.status === 'Emprestado');
             const isPending = member.status === 'pending';
+            const isInactive = member.status === 'inactive' || member.status === 'deleted';
             return `
-              <tr>
+              <tr style="${isInactive ? 'opacity:0.65; background:rgba(239, 68, 68, 0.03);' : ''}">
                 <td><strong>${member.id}</strong></td>
                 <td>
                   <div style="display:flex; align-items:center; gap:0.75rem;">
-                    <div style="width:32px; height:32px; border-radius:var(--radius-full); background:linear-gradient(135deg, var(--accent-primary), #818cf8); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem;">
+                    <div style="width:32px; height:32px; border-radius:var(--radius-full); background:${isInactive ? '#9ca3af' : 'linear-gradient(135deg, var(--accent-primary), #818cf8)'}; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem;">
                       ${member.fullName.charAt(0)}
                     </div>
                     <div>
                       <strong>${member.fullName}</strong>
                       ${member.role === 'librarian' ? `<span style="font-size:0.7rem; margin-left:0.4rem; background:rgba(99, 102, 241, 0.2); color:#818cf8; padding:0.15rem 0.4rem; border-radius:var(--radius-sm);">Bibliotecário</span>` : ''}
-                      ${isPending ? `<span style="font-size:0.7rem; margin-left:0.4rem; background:rgba(239, 68, 68, 0.2); color:#ef4444; padding:0.15rem 0.4rem; border-radius:var(--radius-sm);">Aguarda Aprovação</span>` : ''}
+                      ${isPending ? `<span style="font-size:0.7rem; margin-left:0.4rem; background:rgba(245, 158, 11, 0.2); color:#f59e0b; padding:0.15rem 0.4rem; border-radius:var(--radius-sm);">Aguarda Aprovação</span>` : ''}
+                      ${isInactive ? `<span style="font-size:0.7rem; margin-left:0.4rem; background:rgba(239, 68, 68, 0.2); color:#ef4444; padding:0.15rem 0.4rem; border-radius:var(--radius-sm);">Conta Desativada</span>` : ''}
                     </div>
                   </div>
                 </td>
@@ -102,8 +104,8 @@ export function renderMembers(container) {
                 <td>${member.phone || 'N/A'}</td>
                 <td>${member.joinedDate}</td>
                 <td>
-                  <span class="status-tag ${isPending ? 'overdue' : (memberActiveLoans.length > 0 ? 'borrowed' : 'available')}">
-                    ${isPending ? '⏳ Conta Pendente' : `${memberActiveLoans.length} empréstimo(s)`}
+                  <span class="status-tag ${isInactive ? 'overdue' : (isPending ? 'borrowed' : (memberActiveLoans.length > 0 ? 'borrowed' : 'available'))}">
+                    ${isInactive ? '🔴 Inativo (Soft-Deleted)' : (isPending ? '⏳ Conta Pendente' : `${memberActiveLoans.length} empréstimo(s)`)}
                   </span>
                 </td>
                 ${isLibrarian ? `
@@ -112,9 +114,12 @@ export function renderMembers(container) {
                       ${isPending ? `
                         <button class="btn btn-secondary btn-sm btn-approve-member" data-id="${member.id}" style="background:rgba(16, 185, 129, 0.2); color:#10b981; border-color:rgba(16, 185, 129, 0.4);" title="Aprovar Conta de Leitor">✅ Aprovar</button>
                       ` : ''}
+                      ${isInactive ? `
+                        <button class="btn btn-secondary btn-sm btn-approve-member" data-id="${member.id}" style="background:rgba(16, 185, 129, 0.2); color:#10b981; border-color:rgba(16, 185, 129, 0.4);" title="Reativar Conta de Leitor">✅ Reativar</button>
+                      ` : ''}
                       <button class="btn btn-secondary btn-sm btn-reset-password-member" data-id="${member.id}" data-name="${member.fullName}" title="Repor Palavra-Passe do Leitor">🔑</button>
                       <button class="btn btn-secondary btn-sm btn-edit-member" data-id="${member.id}" title="Editar Leitor">✏️</button>
-                      <button class="btn btn-danger btn-sm btn-delete-member" data-id="${member.id}" title="Eliminar Leitor">🗑️</button>
+                      ${!isInactive ? `<button class="btn btn-danger btn-sm btn-delete-member" data-id="${member.id}" title="Desativar Leitor (Soft-Delete)">🗑️</button>` : ''}
                     </div>
                   </td>
                 ` : ''}

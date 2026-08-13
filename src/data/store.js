@@ -157,6 +157,10 @@ class LibraryStore extends EventTarget {
       throw new Error('A sua conta foi registada, mas ainda se encontra A AGUARDAR APROVAÇÃO pelo Bibliotecário.');
     }
 
+    if (existing.status === 'inactive' || existing.status === 'deleted') {
+      throw new Error('Esta conta de leitor encontra-se inativa/desativada. Por favor contacte o Bibliotecário.');
+    }
+
     const expectedPassword = (existing.password || '123456').replace(/[\u200B-\u200D\uFEFF\xA0]/g, '').trim();
     if (cleanPassword && cleanPassword !== expectedPassword) {
       throw new Error('Palavra-passe incorreta. Por favor verifique os seus dados e tente novamente.');
@@ -378,16 +382,18 @@ class LibraryStore extends EventTarget {
 
     if (activeLoans.length > 0) {
       const memberName = member ? member.fullName : id;
-      throw new Error(`Impossível eliminar o leitor "${memberName}": possui ${activeLoans.length} livro(s) com empréstimo ativo. Efectue a devolução dos livros antes de eliminar o leitor.`);
+      throw new Error(`Impossível desativar o leitor "${memberName}": possui ${activeLoans.length} livro(s) com empréstimo ativo. Efectue a devolução dos livros antes de desativar o leitor.`);
     }
 
     let members = this.getMembers();
-    members = members.filter(m => m.id !== id);
+    // Soft-delete: update status to 'inactive' to preserve historical loan references
+    members = members.map(m => m.id === id ? { ...m, status: 'inactive' } : m);
     localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(members));
     this.notifyChange();
 
-    // Async delete from cloud
-    this.deleteMemberFromCloud(id);
+    // Async sync updated inactive status to cloud
+    const updated = members.find(m => m.id === id);
+    if (updated) this.syncMemberToCloud(updated);
   }
 
   // --- Loans Methods ---
