@@ -26,3 +26,6 @@
 ## 6. Perguntas Investigativas vs Execução (Regra de Interação)
 - Quando o utilizador faz perguntas investigativas ou hipotéticas (ex: *"O que acontece se...?"*, *"Como funciona X?"*), **responder apenas com a explicação**, análise e opções disponíveis.
 - **NÃO implementar ou alterar código imediatamente** após uma pergunta explicativa. Aguardar pelo pedido ou confirmação explícita do utilizador antes de modificar qualquer ficheiro.
+
+## 7. Manutenção Contínua da Documentação (README.md & USER_MANUAL.md)
+- Sempre que forem realizadas alterações de código, novas funcionalidades, correções de bugs ou ajustamentos de UI, atualizar simultaneamente o `README.md` e o `docs/USER_MANUAL.md` para refletir com exatidão os novos comportamentos do sistema.
