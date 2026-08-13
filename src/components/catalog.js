@@ -576,13 +576,37 @@ function openBookModal(book, onSave) {
   document.getElementById('btn-cancel-book').addEventListener('click', closeModal);
   document.getElementById('backdrop-book-modal').addEventListener('click', closeModal);
 
+  // Prevent Form Auto-Submit on Enter inside modal
+  const formBook = document.getElementById('form-book');
+  if (formBook) {
+    formBook.addEventListener('submit', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+  }
+
   // Auto-Fetch API Handler
   const btnAutoFetch = document.getElementById('btn-auto-fetch');
   const autoQuery = document.getElementById('auto-fetch-query');
   const autoStatus = document.getElementById('auto-fetch-status');
 
+  if (autoQuery) {
+    autoQuery.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        e.stopPropagation();
+        if (btnAutoFetch) btnAutoFetch.click();
+      }
+    });
+  }
+
   if (btnAutoFetch) {
-    btnAutoFetch.addEventListener('click', async () => {
+    btnAutoFetch.addEventListener('click', async (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
       const query = autoQuery.value.trim();
       if (!query) {
         showToast('Por favor insira um ISBN, Título ou Autor para pesquisar', 'error');
@@ -603,8 +627,8 @@ function openBookModal(book, onSave) {
           if (fetchedData.coverUrl) document.getElementById('book-cover-url').value = fetchedData.coverUrl;
           if (fetchedData.synopsis) document.getElementById('book-synopsis').value = fetchedData.synopsis;
 
-          autoStatus.innerHTML = `✅ <strong>Sucesso!</strong> Encontrado: <em>"${fetchedData.title}"</em> por ${fetchedData.author || 'Autor desconhecido'} ${fetchedData.isbn ? `(ISBN: ${fetchedData.isbn})` : ''}`;
-          showToast('Dados do livro (incluindo ISBN) preenchidos com sucesso!', 'success');
+          autoStatus.innerHTML = `✅ <strong>Sucesso!</strong> Dados preenchidos: <em>"${fetchedData.title}"</em> por ${fetchedData.author || 'Autor desconhecido'}. Pode rever os campos e clicar em <strong>Guardar Livro</strong>.`;
+          showToast('Dados do livro preenchidos! Reveja os campos e clique em Guardar Livro.', 'success');
         } else {
           autoStatus.innerHTML = `❌ Nenhuma informação encontrada para "<em>${query}</em>". Tente ajustar o ISBN ou título.`;
           showToast('Nenhum resultado encontrado nas bases de dados globais.', 'info');
