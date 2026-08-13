@@ -62,7 +62,7 @@
   --shadow-card: 0 8px 24px -6px rgba(0, 0, 0, 0.08), 0 0 1px 1px rgba(0, 0, 0, 0.05);
 }
 
-/* Camomila Official Theme (Inspired by camomilasbe.pt - Sage Green #498b7c & Yellow #f2d549) */
+/* Camomila Official Theme (Sage Green #498b7c & Yellow #f2d549) */
 [data-theme="camomila"] {
   --bg-primary: #f4f8f7;
   --bg-secondary: #ffffff;
@@ -573,7 +573,7 @@ table.custom-table tr:hover td {
   color: var(--text-dim);
 }
 
-/* Buttons (Pill-Style inspired by camomilasbe.pt) */
+/* Buttons (Pill-Style Rounded Aesthetic) */
 .btn {
   display: inline-flex;
   align-items: center;
