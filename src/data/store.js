@@ -373,6 +373,14 @@ class LibraryStore extends EventTarget {
   }
 
   deleteMember(id) {
+    const member = this.getMembers().find(m => m.id === id);
+    const activeLoans = this.getLoans().filter(l => (l.memberId === id || (member && (l.memberEmail || '').toLowerCase() === (member.email || '').toLowerCase())) && l.status === 'Emprestado');
+
+    if (activeLoans.length > 0) {
+      const memberName = member ? member.fullName : id;
+      throw new Error(`Impossível eliminar o leitor "${memberName}": possui ${activeLoans.length} livro(s) com empréstimo ativo. Efectue a devolução dos livros antes de eliminar o leitor.`);
+    }
+
     let members = this.getMembers();
     members = members.filter(m => m.id !== id);
     localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(members));

@@ -193,10 +193,14 @@ export function renderMembers(container) {
     container.querySelectorAll('.btn-delete-member').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const id = e.currentTarget.dataset.id;
-        if (confirm('Tem a certeza que deseja eliminar este membro?')) {
-          store.deleteMember(id);
-          showToast('Membro eliminado com sucesso', 'success');
-          renderMembers(container);
+        if (confirm('Tem a certeza que deseja eliminar este leitor?')) {
+          try {
+            store.deleteMember(id);
+            showToast('Leitor eliminado com sucesso', 'success');
+            renderMembers(container);
+          } catch (err) {
+            showToast(err.message, 'error');
+          }
         }
       });
     });
