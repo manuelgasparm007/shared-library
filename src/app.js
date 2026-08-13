@@ -23,7 +23,7 @@ function initApp() {
     item.addEventListener('click', (e) => {
       e.preventDefault();
       const targetView = e.currentTarget.dataset.view;
-      if (targetView === 'catalog') {
+      if (e.isTrusted && targetView === 'catalog') {
         resetCatalogFilters();
       }
       switchView(targetView);
@@ -202,7 +202,7 @@ function updateUserUI(user) {
   }
 }
 
-function switchView(viewName) {
+export function switchView(viewName) {
   currentView = viewName;
   localStorage.setItem('active_library_view', viewName);
   if (window.location.hash !== '#' + viewName) {

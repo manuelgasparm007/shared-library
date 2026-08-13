@@ -1,6 +1,7 @@
 import { store } from '../data/store.js';
 import { setCatalogFilter } from './catalog.js';
 import { setLoansFilter } from './loans.js';
+import { switchView } from '../app.js';
 
 export function renderDashboard(container) {
   const books = store.getBooks();
@@ -162,14 +163,14 @@ export function renderDashboard(container) {
         } else if (filterType === 'borrowed') {
           setCatalogFilter({ genre: 'ALL', status: 'Emprestado' });
         }
-        document.querySelector('[data-view="catalog"]').click();
+        switchView('catalog');
       } else if (target === 'loans') {
         if (filterType === 'overdue') {
           setLoansFilter('OVERDUE');
         }
-        document.querySelector('[data-view="loans"]').click();
+        switchView('loans');
       } else if (target === 'members') {
-        document.querySelector('[data-view="members"]').click();
+        switchView('members');
       }
     });
   });
@@ -179,7 +180,7 @@ export function renderDashboard(container) {
     item.addEventListener('click', (e) => {
       const genre = e.currentTarget.dataset.genre;
       setCatalogFilter({ genre: genre, status: 'ALL' });
-      document.querySelector('[data-view="catalog"]').click();
+      switchView('catalog');
     });
   });
 
@@ -188,7 +189,7 @@ export function renderDashboard(container) {
   if (btnViewAllLoans) {
     btnViewAllLoans.addEventListener('click', () => {
       setLoansFilter('ALL');
-      document.querySelector('[data-view="loans"]').click();
+      switchView('loans');
     });
   }
 
@@ -198,7 +199,7 @@ export function renderDashboard(container) {
 
   if (btnQuickAdd) {
     btnQuickAdd.addEventListener('click', () => {
-      document.querySelector('[data-view="catalog"]').click();
+      switchView('catalog');
       setTimeout(() => {
         const addBtn = document.getElementById('btn-add-book-modal');
         if (addBtn) addBtn.click();
@@ -208,7 +209,7 @@ export function renderDashboard(container) {
 
   if (btnQuickCheckout) {
     btnQuickCheckout.addEventListener('click', () => {
-      document.querySelector('[data-view="loans"]').click();
+      switchView('loans');
       setTimeout(() => {
         const checkoutBtn = document.getElementById('btn-checkout-modal');
         if (checkoutBtn) checkoutBtn.click();
