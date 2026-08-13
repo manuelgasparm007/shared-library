@@ -22,3 +22,7 @@
 ## 5. Sessão do Utilizador & Integridade de Estado
 - O método `logout()` deve limpar `this.currentUser = null`, `localStorage`, `sessionStorage` e cookies simultaneamente.
 - Utilizar delegação global de eventos de clique para acionar o encerramento de sessão em qualquer dispositivo.
+
+## 6. Perguntas Investigativas vs Execução (Regra de Interação)
+- Quando o utilizador faz perguntas investigativas ou hipotéticas (ex: *"O que acontece se...?"*, *"Como funciona X?"*), **responder apenas com a explicação**, análise e opções disponíveis.
+- **NÃO implementar ou alterar código imediatamente** após uma pergunta explicativa. Aguardar pelo pedido ou confirmação explícita do utilizador antes de modificar qualquer ficheiro.
